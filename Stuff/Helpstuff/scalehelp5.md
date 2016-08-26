@@ -1,0 +1,1 @@
+<img src="scalehelp.svg" alt="Drawing" style="width: 100%;"/>

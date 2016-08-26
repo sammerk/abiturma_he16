@@ -1,0 +1,136 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700|Open+Sans:400,700);
+
+
+.container-fluid{
+	position:relative;
+}
+.tab-content{
+	width:100%;
+	min-width:auto;
+}
+.navbar-header{
+	margin-top:20px;
+	display:block;
+	float:none;
+}
+.navbar-brand{
+	width:80%;
+	display:inline-block;
+	padding:0 20px 0 0;
+}
+.navbar-brand img{
+	width:100%;
+	max-width:220px;
+}
+.menutoggle{
+	display:inline-block;
+	width:20%;
+	height:100%;
+}
+.menutoggle img{
+	width:30px;
+}
+.nav.navbar-nav{
+	display:none;
+	margin-top:0;
+	margin-bottom:20px;
+	float:none;
+}
+.nav.navbar-nav > li{
+	float:none;
+}
+.nav.navbar-nav > li > a{
+	padding:0;
+	text-transform:uppercase;
+	font-family:'Open Sans Condensed';
+	font-weight:700;
+	text-align:left;
+}
+.navbar{
+	border:none;
+	margin:0;
+	-webkit-box-shadow: 0px 2px 0px 0px rgba(0,0,0,0.2);
+	-moz-box-shadow: 0px 2px 0px 0px rgba(0,0,0,0.2);
+	box-shadow: 0px 2px 0px 0px rgba(0,0,0,0.2);
+}
+
+#splash{
+	height:200px;
+	width:100%;
+	background:url('./img/splash.jpg');
+	background-size:cover;
+	background-position:center center;
+}
+
+h1{
+	font-family:'Open Sans Condensed';
+	font-weight:700;
+	text-transform:uppercase;
+	font-size:16px;
+	text-align:left;
+	margin:10px 0 30px 0;
+}
+.container-fluid{
+	padding:30px;
+}
+.container-fluid ul{
+	padding-left:0;
+}
+.container-fluid ul li{
+	list-style-type:none;
+}
+.container-fluid ul li:before{
+	content:"\00b7";
+	margin-right:4px;
+}
+
+
+/*///////////////////////////////////////////////////////////////////*/
+/*///////////////////////////////////////////////////////////////////*/
+/* DESKTOP STYLES /////////////////////////////////////////////*/
+/*///////////////////////////////////////////////////////////////////*/
+/*///////////////////////////////////////////////////////////////////*/
+
+
+@media screen and (min-width: 915px) {
+	
+	.menutoggle{
+		display:none;
+	}
+	.nav.navbar-nav{
+		display:block;
+	}
+	.navbar-header{
+		display:inline-block;
+		float:left;
+	}
+	.navbar-brand{
+		padding:0;
+	}
+	.navbar-brand img{
+		margin-top:5px;
+	}
+	.container{
+		width:90%
+	}
+	.nav.navbar-nav{
+		margin:0;
+		float:right;
+		margin-top:26px;
+	}
+	.nav.navbar-nav > li{
+		margin-left:10px;
+		float:left;
+	}
+	.nav.navbar-nav > li > a{
+		margin-left:10px;
+	}
+	.container-fluid{
+		width:80%;
+	}
+	#splash{
+		height:400px;
+	}
+	
+	
+}

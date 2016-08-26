@@ -1,0 +1,14 @@
+.Rproj.user
+.Rhistory
+.RData
+responses_jitter/
+responses_likert/
+responses_freitext/
+responses_qualdim2/
+data/
+data/freitextbilder_questor1/
+data/freitextbilder_questor2/
+data/freitextbilder_questor3/
+data/freitextbilder_questor4/
+CopyOfserver.R
+CopyOfui.R

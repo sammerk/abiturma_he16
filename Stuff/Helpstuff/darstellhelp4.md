@@ -1,0 +1,1 @@
+<img src="Darstellung.png" alt="Erklärung der Darstellungsoptionen" style="width: 100%;"/>

@@ -1,0 +1,1 @@
+Wie im Menüpunkt "Einzelfragen" aufgeführt, lassen sich die Einzelfragen aus dem Fragebogen in fünf (mehr oder weniger unabhängige) Dimensionen gliedern. In den einzelnen Dimensionen werden die arithmetischen Mittel der Antworten der entsprechenden Einzelfragen gebildet.
