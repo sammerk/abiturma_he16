@@ -639,7 +639,7 @@ shinyServer(function(input, output, session) {
       filter(gmgroup == "Deine Kurse",
              is.na(value) == FALSE)
     
-    return(ggplot(likertdata4, aes(x=gmgroup)) + geom_bar(aes(fill = value), width = .3) + 
+    testp <- ggplot(likertdata4, aes(x=gmgroup)) + geom_bar(aes(fill = value), width = .3) + 
              coord_flip() + facet_wrap(~variable, ncol =1)   + 
              ggtitle("Deine Kurse Frühjahr '16") +
              # scale_colour_manual(values=cbPalette) +
@@ -654,7 +654,8 @@ shinyServer(function(input, output, session) {
                    plot.background = element_blank(),
                    panel.grid.major = element_blank(),
                    panel.grid.minor = element_blank(),
-                   panel.border = element_blank()))   
+                   panel.border = element_blank())
+    svgPanZoom(testp, controlIconsEnabled = T)
   })
   
   
