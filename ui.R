@@ -1,5 +1,7 @@
 library(shiny)
 library(shinyBS)
+library(svgPanZoom)
+library(gridSVG)
 
 #####################################################################################
 # Calls für Fingerprint                                                  ############
@@ -80,7 +82,7 @@ shinyUI(navbarPage("Unterrichtsfeedback",theme = "lumen.css", #$$
                                 ),
                                 column(6,
                                        bsAlert("likertalert1"),
-                                       plotOutput("einzelplot")
+                                       svgPanZoomOutput(outputId = "einzelplot")
                                 ),
                                 column(6,
                                        plotOutput("gmeaneinzelplot")

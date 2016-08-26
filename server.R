@@ -4,11 +4,14 @@ library(tidyr)
 library(shiny)
 library(shinyBS)
 library(feather)
+library(svgPanZoom)
+library(gridSVG)
+library(scrypt)
 
 
 
 
-# Ip-Test ###################################################################################
+# Ip-Test ################################################################################
 
 ipID <- renderPrint(print(input$ipid))
 
@@ -612,7 +615,8 @@ shinyServer(function(input, output, session) {
   
   output$glimpse_likertdata3 <- renderPrint({summary(freitextdata3())})
   output$user_p <- renderPrint({user()})
-  output$pw_conf <- renderPrint({verifyPassword(kl_pw[kl_pw$Login == user(),"Passwort_scrypted"], input$passw)})
+  output$pw_conf <- renderPrint({verifyPassword(as.character(pw_data[pw_data$Login == user(),"Passwort_scrypted"]), 
+                                                as.character(input$passw))})
   
   
   # Create Einzelplots #################################################################################################
@@ -621,7 +625,7 @@ shinyServer(function(input, output, session) {
   cbPalette <- c("#A51E37", "#D8516A", "#FF849D", "#F8F8F8", "#95C3DF", "#497793", "#002A46")
   
   # Einzelplot ohne grouping
-  output$einzelplot <- renderPlot({                    # Da keine reactives enthalten sind
+  output$einzelplot <- renderSvgPanZoom({                    # Da keine reactives enthalten sind
     likertdata4 <- likertdata3()%>%                   # bzw. likertdata3() via input$golikert
       mutate(gmgroup = factor(gmgroup))%>%              # isoliert ist, kann dies hier voll reaktiv sein
              #variable = ifelse(variable == "Der/die Kursleiter/in hält Dein Interesse während des Kurses durch seinen/ihren Unterrichtsstil aufrecht.",
