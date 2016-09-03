@@ -5,6 +5,28 @@ library(svgPanZoom)
 library(gridSVG)
 source("helpers.R")
 
+
+#####################################################################################
+# js Code for: Enter key = simulation of button press                    ############
+#####################################################################################
+jscode <- '
+$(function() {
+var $els = $("[data-proxy-click]");
+$.each(
+$els,
+function(idx, el) {
+var $el = $(el);
+var $proxy = $("#" + $el.data("proxyClick"));
+$el.keydown(function (e) {
+if (e.keyCode == 13) {
+$proxy.click();
+}
+});
+}
+);
+});
+'
+
 #####################################################################################
 # Calls für Fingerprint                                                  ############
 #####################################################################################
@@ -47,7 +69,8 @@ shinyUI(navbarPage("Unterrichtsfeedback",theme = "lumen.css", #$$
                                      includeMarkdown("Stuff/hallo4.md"))),
                             fluidRow(
                               useShinyjs(),
-                              tags$style(appCSS),
+                              tags$style(appCSS), ## for busyindicator
+                              tags$head(tags$script(HTML(jscode))), ## for "Enter to actionbtn-press simulation
                               column(2),
                               column(2,
                               textInput("username", "Benutzername"),
@@ -61,9 +84,13 @@ shinyUI(navbarPage("Unterrichtsfeedback",theme = "lumen.css", #$$
                                   )
                                   ),
                               column(2,
-                                  passwordInput("passw", "Passwort")))
+                                     tagAppendAttributes(
+                                        passwordInput("passw", "Passwort"),
+                                        `data-proxy-click` = "loginBtn"
+                                      )
+                              )
                             
-                             ),
+                             )),
                    
                    ###########################################################################   #    
                    tabPanel("Einzelfragen",          
