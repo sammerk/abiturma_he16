@@ -1,7 +1,9 @@
 library(shiny)
 library(shinyBS)
+library(shinyjs)
 library(svgPanZoom)
 library(gridSVG)
+source("helpers.R")
 
 #####################################################################################
 # Calls für Fingerprint                                                  ############
@@ -44,15 +46,24 @@ shinyUI(navbarPage("Unterrichtsfeedback",theme = "lumen.css", #$$
                               column(7,
                                      includeMarkdown("Stuff/hallo4.md"))),
                             fluidRow(
+                              useShinyjs(),
+                              tags$style(appCSS),
                               column(2),
-                              column(4,
-                                  textInput("username", "Benutzername")
-                              ),
-                              column(4,
-                                  passwordInput("passw", "Passwort")
-                              )
-                            )
-                            ),
+                              column(2,
+                              textInput("username", "Benutzername"),
+                                  
+                                  withBusyIndicatorUI(
+                                    actionButton(
+                                      "loginBtn",
+                                      "Log in",
+                                      class = "btn-primary"
+                                    )
+                                  )
+                                  ),
+                              column(2,
+                                  passwordInput("passw", "Passwort")))
+                            
+                             ),
                    
                    ###########################################################################   #    
                    tabPanel("Einzelfragen",          

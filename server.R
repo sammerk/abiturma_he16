@@ -618,6 +618,17 @@ shinyServer(function(input, output, session) {
   output$pw_conf <- renderPrint({verifyPassword(as.character(pw_data[pw_data$Login == user(),"Passwort_scrypted"]), 
                                                 as.character(input$passw))})
   
+  observeEvent(input$loginBtn, {
+    # When the button is clicked, wrap the code in a call to `withBusyIndicatorServer()`
+    withBusyIndicatorServer("loginBtn", {
+      Sys.sleep(1)
+      if (verifyPassword(as.character(pw_data[pw_data$Login == user(),"Passwort_scrypted"]), 
+                         as.character(input$passw)) == FALSE) {
+        stop("Login Passwort Kombi ist falsch!")
+      }
+    })
+  })
+  
   
   # Create Einzelplots #################################################################################################
   
