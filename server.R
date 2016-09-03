@@ -626,8 +626,8 @@ shinyServer(function(input, output, session) {
   
   # Einzelplot ohne grouping
   output$einzelplot <- renderSvgPanZoom({                    # Da keine reactives enthalten sind
-    likertdata4 <- likertdata3()%>%                   # bzw. likertdata3() via input$golikert
-      mutate(gmgroup = factor(gmgroup))%>%              # isoliert ist, kann dies hier voll reaktiv sein
+    likertdata4 <- likertdata3()%>%                          # bzw. likertdata3() via input$golikert
+      mutate(gmgroup = factor(gmgroup))%>%                   # isoliert ist, kann dies hier voll reaktiv sein
              #variable = ifelse(variable == "Der/die Kursleiter/in hält Dein Interesse während des Kurses durch seinen/ihren Unterrichtsstil aufrecht.",
              #                  "Der/die Kursleiter/in hält Dein Interesse während des Kurses\ndurch seinen/ihren Unterrichtsstil aufrecht.",
              #                  ifelse(variable == "Die Kursteilnehmer/innen werden ermutigt, eigene Lösungswege zu formulieren und/oder die vorgetragenen Lösungen kritisch zu hinterfragen.",
