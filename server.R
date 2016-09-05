@@ -174,7 +174,45 @@ shinyServer(function(input, output, session) {
     return(input$username)
 
   })
+
+  #####################################################################################################################
+  # Log in Backend                                                                                       ############
+  #####################################################################################################################
   
+  ## Login Feedback for user with busyindicator
+  
+  # reactive value of valid login
+  
+  login_true <- reactive({verifyPassword(as.character(pw_data[pw_data$Login == user(),"Passwort_scrypted"]), 
+                               as.character(input$passw)) == TRUE
+    })  
+  
+  observeEvent(input$loginBtn, {
+    # When the button is clicked, wrap the code in a call to `withBusyIndicatorServer()`
+    withBusyIndicatorServer("loginBtn", {
+      if (login_true() == FALSE) {
+        stop("Login Passwort Kombi ist falsch!")
+      }
+    })
+  })
+  
+  
+  ## Hide further tabs before sucessful login
+  
+  observe({
+    hide(selector = c("#navbarpage li a[data-value=einzelfragen]", 
+                      "#navbarpage li a[data-value=qualdim_v1]",
+                      "#navbarpage li a[data-value=qualdim_v2]",
+                      "#navbarpage li a[data-value=freitext_antw]"))
+  })
+  
+  observeEvent(input$loginBtn, {
+    if(login_true() == TRUE)
+      show(selector = c("#navbarpage li a[data-value=einzelfragen]", 
+                        "#navbarpage li a[data-value=qualdim_v1]",
+                        "#navbarpage li a[data-value=qualdim_v2]",
+                        "#navbarpage li a[data-value=freitext_antw]"))
+  })
   
   #####################################################################################################################
   # Freitext Backend                                                                                       ############
@@ -618,16 +656,7 @@ shinyServer(function(input, output, session) {
   output$pw_conf <- renderPrint({verifyPassword(as.character(pw_data[pw_data$Login == user(),"Passwort_scrypted"]), 
                                                 as.character(input$passw))})
   
-  observeEvent(input$loginBtn, {
-    # When the button is clicked, wrap the code in a call to `withBusyIndicatorServer()`
-    withBusyIndicatorServer("loginBtn", {
-      Sys.sleep(1)
-      if (verifyPassword(as.character(pw_data[pw_data$Login == user(),"Passwort_scrypted"]), 
-                         as.character(input$passw)) == FALSE) {
-        stop("Login Passwort Kombi ist falsch!")
-      }
-    })
-  })
+
   
   
   # Create Einzelplots #################################################################################################

@@ -7,7 +7,7 @@ source("helpers.R")
 
 
 #####################################################################################
-# js Code for: Enter key = simulation of button press                    ############
+# js code for: enter key = simulation of button press                    ############
 #####################################################################################
 jscode <- '
 $(function() {
@@ -28,7 +28,7 @@ $proxy.click();
 '
 
 #####################################################################################
-# Calls für Fingerprint                                                  ############
+# Calls for Fingerprint                                                  ############
 #####################################################################################
 inputUserid <- function(inputId, value='') {
   #   print(paste(inputId, "=", value))
@@ -56,11 +56,14 @@ inputIp <- function(inputId, value=''){
 # ShinyUI                                                                ############
 #####################################################################################
 
-shinyUI(navbarPage("Unterrichtsfeedback",theme = "lumen.css", #$$
+shinyUI(
+  tagList(
+  useShinyjs(),
+  navbarPage("Unterrichtsfeedback", id = "navbarpage", theme = "lumen.css", #$$
                    
-                   ###########################################################################
-                   
-                   ############################################################################
+###########################################################################
+# Vorwort                                                            ######
+###########################################################################
                    tabPanel("Vorwort", 
                             fluidRow(class="splash",tags$div(id="splash")), #$$
                             fluidRow(
@@ -92,8 +95,10 @@ shinyUI(navbarPage("Unterrichtsfeedback",theme = "lumen.css", #$$
                             
                              )),
                    
-                   ###########################################################################   #    
-                   tabPanel("Einzelfragen",          
+###########################################################################
+# Einzelfragen                                                       ######
+###########################################################################
+                   tabPanel(title = "Einzelfragen", value = "einzelfragen",
                             sidebarLayout(
                               sidebarPanel(width = 2,
                                            inputIp("ipid"),
@@ -140,10 +145,12 @@ shinyUI(navbarPage("Unterrichtsfeedback",theme = "lumen.css", #$$
                               
                    )),
                    
-                   ###########################################################################       #
-                   tabPanel("Qualitätsdimensionen_v1",          
+###########################################################################
+# Qualitätsdimensionen_v1                                            ######
+###########################################################################
+                   tabPanel(title = "Qualitätsdimensionen_v1", value = "qualdim_v1",
                             sidebarLayout(
-                              sidebarPanel(width = 3,
+                              sidebarPanel(width = 2,
                                 checkboxGroupInput("qualdim", span(tags$strong("Qualitätsdimensionen")," (min. eine ausw.)",
                                                                    bsButton("jitterqualdimmodalbt", "?", 
                                                                             style = "inverse", size = "extra-small")),
@@ -181,13 +188,13 @@ shinyUI(navbarPage("Unterrichtsfeedback",theme = "lumen.css", #$$
                                 actionButton("goqualdim", "Plot!")
                                 
                               ),
-                              mainPanel(width = 9,
+                              mainPanel(width = 10,
+                               fluidRow(
+                               column(9,          
                                 bsAlert("jitteralert1"),
                                 h2("Dein Plot"),
                                 
                                 uiOutput("jitter.plot.ui"),
-                                #DT::dataTableOutput("debugjitterdata"),
-                                #plotOutput("jitterplot2"),
                                 hr(),
                                 bsModal("qualdimhelpjitter", "Auswahl der Qualitätsdimensionen", "jitterqualdimmodalbt", size = "small",
                                         includeMarkdown("Stuff/Helpstuff/qualdimhelpjitter2.md")),
@@ -198,26 +205,38 @@ shinyUI(navbarPage("Unterrichtsfeedback",theme = "lumen.css", #$$
                                 bsButton("help_table_bt", label = "Erläuterung der Darstellung"),
                                 bsModal("help_table", "Erläuterung der Darstellung", "help_table_bt", size = "large",##
                                         includeHTML("Stuff/Helpstuff/help_table1.html")),
-#                                 bsButton("help_table_bt2", label = "Erläuterung der Darstellung Image"),
-#                                 bsModal("help_table2", "Erläuterung der Darstellung", "help_table_bt2", size = "large",
-#                                         #includeHTML("Stuff/Helpstuff/darstell_modal_im2.html")),
-#                                         #imageOutput("darstell_help_im")),
-#                                         img(src = "img/darstell_modal_im2.png", width = 800, style = "display: block; margin-left: auto; margin-right: auto;")),
-#                                         #tags$div(HTML(""))),
                                 bsButton("help_scale_bt", label = "Erläuterung der Skalierungen"),
                                 bsModal("help_scale", "Erläuterung der Skalierungen", "help_scale_bt", size = "large",
-                                        withMathJax(includeMarkdown("Stuff/Helpstuff/scalehelp7.md")))
-                                
-                                
-                                
-                              )
+                                        withMathJax(includeMarkdown("Stuff/Helpstuff/scalehelp7.md")))),
+                               column(3, 
+                                wellPanel(
+                                h4("Bitte gib uns hin und wieder Feedback zu einem Plot!"),
+                                selectInput("qualdim1_fb_inf", "Den aktuell dargestellten Plot finde ich ...",
+                                            c("..." = NA,
+                                              "1 = gar nicht informativ " = 1,
+                                              "2" = 2,
+                                              "3" = 3,
+                                              "4" = 4,
+                                              "5" = 5,
+                                              "6 = sehr informativ" = 6)),
+                                textInput("qualdim1_fb_finf", "Besonders informativ am aktuell dargestellten Plot finde ich ...",
+                                          value = "..."),
+                                textInput("qualdim1_fb_fazit", "Welche Erkenntnisse hast Du für Dich aus dem
+                                          aktuell dargestellten Plot gewinnen können?",
+                                          value = "..."),
+                                actionButton("qualdim1_fb_btn", "Feedback abschicken")
+                                )
+                               )
+                             ))
                             
                    )),
 
 
                    
-                   ###########################################################################
-                   tabPanel("Qualitätsdimensionen_v2",
+###########################################################################
+# Qualitätsdimensionen_v2                                            ######
+###########################################################################
+                   tabPanel(title = "Qualitätsdimensionen_v2", value = "qualdim_v2",
                         sidebarLayout(
                             sidebarPanel(width = 3,
                               selectInput("qualdim2", label = h3("Ich möchte ..."), 
@@ -262,8 +281,13 @@ shinyUI(navbarPage("Unterrichtsfeedback",theme = "lumen.css", #$$
                             )
                         )
                     ),
-#############################################################################
-tabPanel("Freitext-Antworten",
+
+
+###########################################################################
+# Freitext-Antworten                                                 ######
+###########################################################################
+
+tabPanel(title = "Freitext-Antworten", value = "freitext_antw",
          sidebarLayout(
            sidebarPanel(width = 3,
                         radioButtons("sort_freitexte", "Freitexte sortieren ?",
@@ -311,6 +335,6 @@ tabPanel("Freitext-Antworten",
 #                             
 #                             
 #                    )
-))
+)))
                    
                    
