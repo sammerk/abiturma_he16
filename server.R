@@ -833,6 +833,8 @@ shinyServer(function(input, output, session) {
     eventReactive(input$golikert, { 
       
       # Alerts ###################################################################################################
+      
+      ## none-selection alert
       if(input$likertfragen == "nolikert") {
         createAlert(session, "likertalert1", "LikertAlert1", title = "Bitte Auswahl treffen!",
                     content = "<ul>Bitte wähle aus, welche Einzelfragen dargestellt werden sollen.
@@ -843,7 +845,7 @@ shinyServer(function(input, output, session) {
         closeAlert(session, "LikertAlert1")
       }
       
-      ## Create Alert for likert tab if Login not successfull
+      ## Create Login Alert for likert tab if Login not successfull 
       
       if(login_true() == FALSE) {
         createAlert(session, "loginalert", "Loginalert", title = "Achtung!",
@@ -864,7 +866,7 @@ shinyServer(function(input, output, session) {
           mutate(gmgroup     =  ifelse(kursleiterin == user(), "Deine Kurse", "abiturma gesamt"))%>%
           filter(variable %in% items_lern)
         #setProgress(value = 1, detail = "fertig")
-        return(likertdata2)
+       
         #})
       }
       
@@ -873,7 +875,7 @@ shinyServer(function(input, output, session) {
           filter(Kursbeginn != "Herbst '15")%>%
           mutate(gmgroup     =  ifelse(kursleiterin == user(), "Deine Kurse", "abiturma gesamt"))%>%
           filter(variable %in% items_orga)
-        return(likertdata2)
+        
       }
       
       if("Enthusiasmus" %in% input$likertfragen){
@@ -881,7 +883,7 @@ shinyServer(function(input, output, session) {
           filter(Kursbeginn != "Herbst '15")%>%
           mutate(gmgroup     =  ifelse(kursleiterin == user(), "Deine Kurse", "abiturma gesamt"))%>%
           filter(variable %in% items_enth)
-        return(likertdata2)
+        
       }
       
       if("Interaktion" %in% input$likertfragen){
@@ -890,7 +892,7 @@ shinyServer(function(input, output, session) {
           mutate(gmgroup     =  ifelse(kursleiterin == user(), "Deine Kurse", "abiturma gesamt"),
                  mggroup     =  paste("Dein Kurs in", Kursort, "/n", Kursbeginn, Uhrzeit))%>%
           filter(variable %in% items_grup)
-        return(likertdata2)
+        
       }
       
       if("Beziehung" %in% input$likertfragen){
@@ -899,7 +901,7 @@ shinyServer(function(input, output, session) {
           mutate(gmgroup     =  ifelse(kursleiterin == user(), "Deine Kurse", "abiturma gesamt"),
                  mggroup     =  paste("Dein Kurs in", Kursort, "/n", Kursbeginn, Uhrzeit))%>%
           filter(variable %in% items_indi)
-        return(likertdata2)
+        
       }
       
       if("Weiterempfehlung" %in% input$likertfragen){
@@ -907,15 +909,35 @@ shinyServer(function(input, output, session) {
           filter(Kursbeginn != "Herbst '15")%>%
           mutate(gmgroup     =  ifelse(kursleiterin == user(), "Deine Kurse", "abiturma gesamt"))%>%
           filter(variable %in% items_empf)
-        return(likertdata2)
+        
       }
       
+    #  return(likertdata2)
       
+      
+      
+       likertdata2b <- likertdata2%>%
+          filter(is.na(value)==F)%>%
+          group_by(value, gmgroup, variable)%>%
+          summarize(Freq = n())%>%
+          ungroup()%>%
+          group_by(gmgroup, variable)%>%
+          mutate(Freq_per = Freq/sum(Freq, na.rm = T)*100)%>%
+          ungroup()
+      
+      
+    if(!"gmean" %in% input$groupinl){
+       likertdata2b <-likertdata2b%>%
+       filter(gmgroup == "Deine Kurse")
+       }
+      
+      return(likertdata2b)
+        
       })
   
   ## Debug  #################################################################################################
   
-  output$glimpse_likertdata3 <- renderPrint({summary(freitextdata3())})
+  output$glimpse_likertdata3 <- renderPrint({glimpse(likertdata3())})
   output$user_p <- renderPrint({user()})
   output$pw_conf <- renderPrint({input$likertfragen})
   
@@ -929,8 +951,8 @@ shinyServer(function(input, output, session) {
   
   # Einzelplot ohne grouping
   output$einzelplot <- renderSvgPanZoom({                    # Da keine reactives enthalten sind
-    likertdata4 <- likertdata3()%>%                          # bzw. likertdata3() via input$golikert
-      mutate(gmgroup = factor(gmgroup))%>%                   # isoliert ist, kann dies hier voll reaktiv sein
+   # likertdata4 <- likertdata3()%>%                          # bzw. likertdata3() via input$golikert
+    #  mutate(gmgroup = factor(gmgroup))%>%                   # isoliert ist, kann dies hier voll reaktiv sein
              #variable = ifelse(variable == "Der/die Kursleiter/in hält Dein Interesse während des Kurses durch seinen/ihren Unterrichtsstil aufrecht.",
              #                  "Der/die Kursleiter/in hält Dein Interesse während des Kurses\ndurch seinen/ihren Unterrichtsstil aufrecht.",
              #                  ifelse(variable == "Die Kursteilnehmer/innen werden ermutigt, eigene Lösungswege zu formulieren und/oder die vorgetragenen Lösungen kritisch zu hinterfragen.",
@@ -939,10 +961,10 @@ shinyServer(function(input, output, session) {
              #                                "Der/die Kursleiter/in gibt den Teilnehmenden das Gefühl,\njederzeit um Hilfe bitten zu können.", 
              #                                ifelse(variable == "Die Kursteilnehmer/innen werden eingeladen, eigene Ideen und Lösungswege mitzuteilen.",
              #                                       "Die Kursteilnehmer/innen werden eingeladen, eigene\nIdeen und Lösungswege mitzuteilen.", variable)))))%>%
-      filter(gmgroup == "Deine Kurse",
-             is.na(value) == FALSE)
+      #filter(gmgroup == "Deine Kurse",  ## nicht mehr nötig nach table operation die zu likertdata2a führt
+      #       is.na(value) == FALSE)
     
-    testp <- ggplot(likertdata4, aes(x=gmgroup)) + geom_bar(aes(fill = value), width = .3) + 
+    testp <- ggplot(likertdata3(), aes(x=gmgroup, y = Freq_per, fill = value)) + geom_bar(stat='identity') + 
              coord_flip() + facet_wrap(~variable, ncol =1)   + 
              ggtitle("Deine Kurse Frühjahr '16") +
              # scale_colour_manual(values=cbPalette) +
@@ -950,10 +972,10 @@ shinyServer(function(input, output, session) {
                                labels = c("1 = trifft überhaupt nicht zu", "2","3" ,"4","5" ,"6","7 = trifft vollständig zu"), values=cbPalette) +
              guides(fill = guide_legend(nrow = 1)) +
              theme(legend.title=element_blank(), legend.position = "top",
-                   axis.ticks = element_blank(), axis.text.x = element_blank(),
+                 #  axis.ticks = element_blank(), axis.text.x = element_blank(),
                    axis.text.y = element_blank(),
                    strip.text.x = element_text(size = 11),
-                   axis.title.x = element_blank(), axis.title.y = element_blank(),
+                 #  axis.title.x = element_blank(), axis.title.y = element_blank(),
                    plot.background = element_blank(),
                    panel.grid.major = element_blank(),
                    panel.grid.minor = element_blank(),
@@ -963,46 +985,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  # Vergleichsplot
-  gmeaneinzelplotgone <- eventReactive(input$golikert, {   # Verleichsplot wird als reaktive Variable
-    if("gmean" %in% input$groupinl){                       # erstellt, da er durch die if-Bedingung 
-      likertdata5 <- likertdata3()%>%                      # selbst reaktiv ist.
-        mutate(gmgroup = factor(gmgroup),              # isoliert ist, kann dies hier voll reaktiv sein
-               variable = ifelse(variable == "Der/die Kursleiter/in hält Dein Interesse während des Kurses durch seinen/ihren Unterrichtsstil aufrecht.",
-                                 "Der/die Kursleiter/in hält Dein Interesse während des Kurses\ndurch seinen/ihren Unterrichtsstil aufrecht.",
-                                 ifelse(variable == "Die Kursteilnehmer/innen werden ermutigt, eigene Lösungswege zu formulieren und/oder die vorgetragenen Lösungen kritisch zu hinterfragen.",
-                                        "Die Kursteilnehmer/innen werden ermutigt, eigene Lösungswege zu\nformulieren und/oder die vorgetragenen Lösungen kritisch zu hinterfragen.",
-                                        ifelse(variable == "Der/die Kursleiter/in gibt den Teilnehmenden das Gefühl, jederzeit um Hilfe bitten zu können.",
-                                               "Der/die Kursleiter/in gibt den Teilnehmenden das Gefühl,\njederzeit um Hilfe bitten zu können.", 
-                                               ifelse(variable == "Die Kursteilnehmer/innen werden eingeladen, eigene Ideen und Lösungswege mitzuteilen.",
-                                                      "Die Kursteilnehmer/innen werden eingeladen, eigene\nIdeen und Lösungswege mitzuteilen.", variable)))))%>%
-        filter(gmgroup == "abiturma gesamt",
-               is.na(value) == FALSE)
-      
-      return(ggplot(likertdata5, aes(x=gmgroup)) + geom_bar(aes(fill = value), width = .3) + 
-               coord_flip() + facet_wrap(~variable, ncol =1) +  
-               ggtitle("abiturma Frühjahr '16") +
-               scale_fill_manual(limits = c("1 = trifft überhaupt nicht zu", "2","3" ,"4","5" ,"6","7 = trifft vollständig zu"),
-                                 labels = c("1 = trifft überhaupt nicht zu", "2","3" ,"4","5" ,"6","7 = trifft vollständig zu"), values=cbPalette) +
-               guides(fill = guide_legend(nrow = 1)) + 
-               #scale_fill_manual(values=cbPalette) +
-               theme(legend.title=element_blank(), legend.position = "top",
-                     axis.ticks = element_blank(), axis.text.x = element_blank(),
-                     axis.text.y = element_blank(),
-                     strip.text.x = element_text(size = 11),
-                     axis.title.x = element_blank(), axis.title.y = element_blank(),
-                     plot.background = element_blank(),
-                     panel.grid.major = element_blank(),
-                     panel.grid.minor = element_blank(),
-                     panel.border = element_blank()))    
-    }
-  })
-  
-  output$gmeaneinzelplot <- renderPlot({                   # Reaktiver Aufruf des Renderings
-    gmeaneinzelplotgone()
-  })
-  
-  
+ 
   # Usage tracking likertplot ###########################################################################################
   
   # Whenever a field is filled, aggregate all form data

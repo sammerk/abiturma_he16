@@ -152,12 +152,11 @@ shinyUI(
                                            ".shiny-output-error { visibility: hidden; }",
                                            ".shiny-output-error:before { visibility: hidden; }"),
                                 fluidRow(
-                                column(6,
+                                column(12,
                                        bsAlert("loginalert"),
                                        bsAlert("likertalert1"),
-                                       svgPanZoomOutput(outputId = "einzelplot")),
-                                column(6,
-                                       plotOutput("gmeaneinzelplot")),
+                                       svgPanZoomOutput(outputId = "einzelplot", width = "100%", height = "600px")),
+
                                 column(12,
                                        verbatimTextOutput("pw_conf")),
 

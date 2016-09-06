@@ -13,12 +13,6 @@ likertdata4 <- likertdata1%>%
      mutate(gmgroup = ifelse(kursleiterin == "demouser1", "meine Kurse", "abiturma rest"))%>%
      filter(variable %in% items_orga)
 
-likertdata5 <- data.frame(table(likertdata4$value, likertdata4$gmgroup))%>%
-  group_by(Var2)%>%
-  mutate(Freq_per = Freq/sum(Freq, na.rm = T)*100)%>%
-  ungroup()
-  
-
 likertdata6 <- likertdata4%>%
   filter(is.na(value)==F)%>%
   group_by(value, gmgroup, variable)%>%
@@ -41,3 +35,5 @@ ggplot(likertdata6,aes(x = gmgroup, y = Freq_per, fill = value)) +
 
   ggplotly(ggplot(likertdata6,aes(x = gmgroup, y = Freq_per, fill = value)) + 
   geom_bar(stat='identity') + coord_flip() + facet_wrap(~variable, ncol =1))
+  
+
