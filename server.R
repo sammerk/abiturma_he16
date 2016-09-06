@@ -296,20 +296,20 @@ shinyServer(function(input, output, session) {
   
   ## Hide further tabs before sucessful login
   
-  # observe({
-  #   hide(selector = c("#navbarpage li a[data-value=einzelfragen]", 
-  #                     "#navbarpage li a[data-value=qualdim_v1]",
-  #                     "#navbarpage li a[data-value=qualdim_v2]",
-  #                     "#navbarpage li a[data-value=freitext_antw]"))
-  # })
-  # 
-  # observeEvent(input$loginBtn, {
-  #   if(login_true() == TRUE)
-  #     show(selector = c("#navbarpage li a[data-value=einzelfragen]", 
-  #                       "#navbarpage li a[data-value=qualdim_v1]",
-  #                       "#navbarpage li a[data-value=qualdim_v2]",
-  #                       "#navbarpage li a[data-value=freitext_antw]"))
-  # })
+   observe({
+     hide(selector = c("#navbarpage li a[data-value=einzelfragen]", 
+                       "#navbarpage li a[data-value=qualdim_v1]",
+                       "#navbarpage li a[data-value=qualdim_v2]",
+                       "#navbarpage li a[data-value=freitext_antw]"))
+   })
+   
+   observeEvent(input$loginBtn, {
+     if(login_true() == TRUE)
+       show(selector = c("#navbarpage li a[data-value=einzelfragen]", 
+                         "#navbarpage li a[data-value=qualdim_v1]",
+                         "#navbarpage li a[data-value=qualdim_v2]",
+                         "#navbarpage li a[data-value=freitext_antw]"))
+   })
   
   #####################################################################################################################
   # Freitext Backend                                                                                       ############
@@ -319,6 +319,9 @@ shinyServer(function(input, output, session) {
   
   freitextdata2 <- 
     eventReactive(input$gofreitext, { 
+      
+      
+      
       
       if(input$sort_freitexte == "abst"){
         freitextdata1 <-
@@ -361,6 +364,17 @@ shinyServer(function(input, output, session) {
   
   freitextplotgone <- eventReactive(input$gofreitext,{  
     
+    ## Create Alert for freitext tab if Login not successfull
+    
+    if(login_true() == FALSE) {
+      createAlert(session, "loginalert4", "Loginalert4", title = "Achtung!",
+                  content = "<ul>Deine Login/Passwort-Kombination ist nicht korrekt</ul>", append = FALSE)
+    }
+    
+    if(login_true() == TRUE) {
+      closeAlert(session, "Loginalert4")
+    }
+    
     plot_output_list <- lapply(1:length((freitextdata2()$ftk)), function(i) {
       plotname <- paste("freitextplot", i, sep="")
       plotOutput(plotname, height = 100)
@@ -398,6 +412,7 @@ shinyServer(function(input, output, session) {
   
   ## Rendering FreitextUI #############################################################################################
   output$freitextplots <- renderUI({
+    if(login_true() == T)
     freitextplotgone()
   })
   
@@ -448,6 +463,17 @@ shinyServer(function(input, output, session) {
   
   
   qualdimplotgone <- eventReactive(input$goqualdim,{     
+    
+    ## Create Alert for q1 tab if Login not successfull
+    
+    if(login_true() == FALSE) {
+      createAlert(session, "loginalert2", "Loginalert2", title = "Achtung!",
+                  content = "<ul>Deine Login/Passwort-Kombination ist nicht korrekt</ul>", append = FALSE)
+    }
+    
+    if(login_true() == TRUE) {
+      closeAlert(session, "Loginalert2")
+    }
     
     # Data fetching ###################################################################################################
     kursdata3 <- kursdata1()  
@@ -801,7 +827,7 @@ shinyServer(function(input, output, session) {
   
   
   
-  # Create reactive dataset for likert panel and subset it accoding to input$likertfragen #############################
+  # Create reactive dataset for likert panel and subset it according to input$likertfragen #############################
   
   likertdata3 <- 
     eventReactive(input$golikert, { 
@@ -817,7 +843,7 @@ shinyServer(function(input, output, session) {
         closeAlert(session, "LikertAlert1")
       }
       
-      ## Create Alert for further tabs if Login not successfull
+      ## Create Alert for likert tab if Login not successfull
       
       if(login_true() == FALSE) {
         createAlert(session, "loginalert", "Loginalert", title = "Achtung!",
@@ -884,6 +910,7 @@ shinyServer(function(input, output, session) {
         return(likertdata2)
       }
       
+      
       })
   
   ## Debug  #################################################################################################
@@ -931,6 +958,7 @@ shinyServer(function(input, output, session) {
                    panel.grid.major = element_blank(),
                    panel.grid.minor = element_blank(),
                    panel.border = element_blank())
+    if(login_true() == T)
     svgPanZoom(testp, controlIconsEnabled = T)
   })
   
@@ -996,6 +1024,19 @@ shinyServer(function(input, output, session) {
   #####################################################################################################################
   
   qualdim2plotgone <- eventReactive(input$goqualdim2,{     
+    
+    ## Create Alert for qualdim2 tab if Login not successfull
+    
+    if(login_true() == FALSE) {
+      createAlert(session, "loginalert3", "Loginalert3", title = "Achtung!",
+                  content = "<ul>Deine Login/Passwort-Kombination ist nicht korrekt</ul>", append = FALSE)
+    }
+    
+    if(login_true() == TRUE) {
+      closeAlert(session, "Loginalert3")
+    }
+    
+    
     
     # Data fetching ###################################################################################################
     
@@ -1106,6 +1147,7 @@ shinyServer(function(input, output, session) {
   
   # Call of qualidim2plotgone() & Interprethilfe  mit Actionbutton  ####################################################
   output$qualdim2plot <- renderPlot({
+    if(login_true() == T)
     qualdim2plotgone()
   }, res = 72)  
   

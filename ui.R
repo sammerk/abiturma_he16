@@ -218,7 +218,8 @@ shinyUI(
                               ),
                               mainPanel(width = 10,
                                fluidRow(
-                               column(9,          
+                               column(9,
+                                bsAlert("loginalert2"),
                                 bsAlert("jitteralert1"),
                                 h2("Dein Plot"),
                                 
@@ -284,7 +285,8 @@ shinyUI(
                               
                             mainPanel(width = 9,
                              fluidRow(
-                             column(9,   
+                             column(9,
+                              bsAlert("loginalert3"),
                               bsAlert("qualdim2alert1"),
                               plotOutput("qualdim2plot", height = "500px"),
                               #actionButton("interpretbutton", "Interpretationshilfe für diesen Plot anzeigen"),
@@ -356,6 +358,7 @@ tabPanel(title = "Freitext-Antworten", value = "freitext_antw",
            mainPanel(width = 9,
               fluidRow(
                 column(9,
+                     bsAlert("loginalert4"),
                      h3("Deine Freitexte (nur Winter/Frühjahr '16)"),
                      p("Bitte über Sortierung entscheiden. \n
                        Dann erscheinen einige Sekunden nach Drücken des \"Freitexte Anzeigen\" 
