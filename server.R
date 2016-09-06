@@ -146,7 +146,22 @@ loadData_q2 <- function() {
 }
 
 
+# Function for Feedback recording of jitter navbarpage #####################################
 
+fields_fb_q1 <- c("qualdim1_fb_inf", "qualdim1_fb_finf", "qualdim1_fb_fazit")   # names of fields to track
+outputDir_fb_q1 <- "responses_fb_q1"
+
+saveData_fb_q1 <- function(data_fb_q1) {
+  data_fb_q1 <- t(data_fb_q1)
+  # Create a unique file name
+  fileName_fb_q1 <- sprintf("%s_%s.csv", as.integer(Sys.time()), digest::digest(data_fb_q1))
+  # Write the file to the local system
+  write.csv(
+    x = data_fb_q1,
+    file = file.path(outputDir_fb_q1, fileName_fb_q1), 
+    row.names = FALSE, quote = TRUE
+  )
+}
 
 #######################################################################################################################
 ####                            #######################################################################################
@@ -540,11 +555,28 @@ shinyServer(function(input, output, session) {
   # Backend Feedbackforms                                                                                  ############
   #####################################################################################################################
   
-  ## Feedback for Qualdim 1 page
+  ## Feedback for Qualdim 1 page ######################################################################################
+  
+  # Reset q1 ###########################################
   observeEvent(input$qualdim1_fb_btn, {
     reset("qualdim1_fb_inf")
     reset("qualdim1_fb_finf")
     reset("qualdim1_fb_fazit")
+  })
+  
+  # Write Feedback q1 ##################################
+  
+  # Whenever a field is filled, aggregate all form data
+  formData_fb_q1 <- reactive({
+    data_fb_q1 <- sapply(fields_fb_q1, function(x) input[[x]])
+    data_fb_q1$systtime <- paste(Sys.time())
+    data_fb_q1$user <- user()
+    data_fb_q1
+  })
+  
+  # When the Submit button is clicked, save the form data
+  observeEvent(input$qualdim1_fb_btn, {
+    saveData_fb_q1(formData_fb_q1())
   })
   
   #####################################################################################################################
