@@ -536,6 +536,16 @@ shinyServer(function(input, output, session) {
   #              aes(x=variable, y= value.std))  + geom_blank()    + facet_wrap(~  gmgroup, ncol = 3) + stat_sum_single(mean)
   #     })
   
+  #####################################################################################################################
+  # Backend Feedbackforms                                                                                  ############
+  #####################################################################################################################
+  
+  ## Feedback for Qualdim 1 page
+  observeEvent(input$qualdim1_fb_btn, {
+    reset("qualdim1_fb_inf")
+    reset("qualdim1_fb_finf")
+    reset("qualdim1_fb_fazit")
+  })
   
   #####################################################################################################################
   # Einzelfragen Backend                                                                                   ############
@@ -653,8 +663,7 @@ shinyServer(function(input, output, session) {
   
   output$glimpse_likertdata3 <- renderPrint({summary(freitextdata3())})
   output$user_p <- renderPrint({user()})
-  output$pw_conf <- renderPrint({verifyPassword(as.character(pw_data[pw_data$Login == user(),"Passwort_scrypted"]), 
-                                                as.character(input$passw))})
+  output$pw_conf <- renderPrint({input$likertfragen})
   
 
   

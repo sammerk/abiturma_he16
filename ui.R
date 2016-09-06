@@ -185,7 +185,7 @@ shinyUI(
                                              selected = "noscale"),
                                 hr(),
                                 
-                                actionButton("goqualdim", "Plot!")
+                                actionButton("goqualdim", "Plot!", icon = icon("bar-chart-o", lib = "font-awesome"))
                                 
                               ),
                               mainPanel(width = 10,
@@ -211,7 +211,9 @@ shinyUI(
                                column(3, 
                                 wellPanel(
                                 h4("Bitte gib uns hin und wieder Feedback zu einem Plot!"),
-                                selectInput("qualdim1_fb_inf", "Den aktuell dargestellten Plot finde ich ...",
+                                div(
+                                  id = "form",
+                                selectInput("qualdim1_fb_inf", div(HTML("<p>Den aktuell dargestellten Plot finde ich&nbsp;...</p>")),
                                             c("..." = NA,
                                               "1 = gar nicht informativ " = 1,
                                               "2" = 2,
@@ -219,12 +221,13 @@ shinyUI(
                                               "4" = 4,
                                               "5" = 5,
                                               "6 = sehr informativ" = 6)),
-                                textInput("qualdim1_fb_finf", "Besonders informativ am aktuell dargestellten Plot finde ich ...",
+                                textInput("qualdim1_fb_finf", div(HTML("<p>Besonders informativ am aktuell dargestellten Plot finde ich&nbsp;...</p>")),
                                           value = "..."),
                                 textInput("qualdim1_fb_fazit", "Welche Erkenntnisse hast Du für Dich aus dem
                                           aktuell dargestellten Plot gewinnen können?",
                                           value = "..."),
-                                actionButton("qualdim1_fb_btn", "Feedback abschicken")
+                                actionButton("qualdim1_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
+                                )
                                 )
                                )
                              ))
