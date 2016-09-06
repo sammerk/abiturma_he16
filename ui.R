@@ -8,8 +8,8 @@ source("helpers.R")
 
 #####################################################################################
 # js code for:                                                           ############
-#     -enter key = simulation of button press                            ############
-#     -action button = close app                                         ############
+#     -enter key = simulation of button press                            
+#     -action button = close app                                         
 #####################################################################################
 
 jscode <- '
@@ -76,7 +76,6 @@ shinyUI(
                               column(7,
                                      includeMarkdown("Stuff/hallo4.md"))),
                             fluidRow(
-                              useShinyjs(),
                               tags$style(appCSS), ## for busyindicator
                               tags$head(tags$script(HTML(jscode))), ## for "Enter to actionbtn-press simulation
                               column(2),
@@ -131,6 +130,7 @@ shinyUI(
                                            ".shiny-output-error:before { visibility: hidden; }"),
                                 fluidRow(
                                 column(6,
+                                       bsAlert("loginalert"),
                                        bsAlert("likertalert1"),
                                        svgPanZoomOutput(outputId = "einzelplot")),
                                 column(6,
@@ -354,6 +354,8 @@ tabPanel(title = "Freitext-Antworten", value = "freitext_antw",
            ),
            
            mainPanel(width = 9,
+              fluidRow(
+                column(9,
                      h3("Deine Freitexte (nur Winter/Frühjahr '16)"),
                      p("Bitte über Sortierung entscheiden. \n
                        Dann erscheinen einige Sekunden nach Drücken des \"Freitexte Anzeigen\" 
@@ -362,9 +364,31 @@ tabPanel(title = "Freitext-Antworten", value = "freitext_antw",
                        Bewertungen in den Qualitätsdimensionen sortiert: Oben stehen die Freitexte von TeilnehmerInnen die dich 
                        am besten bewertet haben."),
                      uiOutput("freitextplots")
-                     )
+                     ),
+               column(3,
+                     wellPanel(
+                       h4("Bitte gib uns Feedback zu deiner Wahrnehmung der Freitexte!"),
+                       div(
+                         id = "form",
+                         selectInput("frei_fb_inf", div(HTML("<p>Die Freitexte finde ich&nbsp;...</p>")),
+                                     c("..." = NA,
+                                       "1 = gar nicht informativ " = 1,
+                                       "2" = 2,
+                                       "3" = 3,
+                                       "4" = 4,
+                                       "5" = 5,
+                                       "6 = sehr informativ" = 6)),
+                         textInput("frei_fb_finf", div(HTML("<p>Besonders informativ an den Freitexten finde ich&nbsp;...</p>")),
+                                   value = "..."),
+                         textInput("frei_fb_fazit", "Welche Erkenntnisse hast Du für Dich aus deinen
+                                   Freitexten gewinnen können?",
+                                   value = "..."),
+                         actionButton("frei_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
+                     )) 
+              )
+              
            )
-         ),
+         ))),
 
    
 
@@ -427,6 +451,8 @@ tabPanel(title = "Logout", value = "logout",
          ))
 
 
-)))
+))
+)
+
                    
                    

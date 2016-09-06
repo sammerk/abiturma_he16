@@ -12,7 +12,7 @@ library(scrypt)
 
 
 # Ip-Test ################################################################################
-
+Sys.setenv(TZ='GMT+4')
 ipID <- renderPrint(print(input$ipid))
 
 # Data Import ############################################################################
@@ -217,6 +217,23 @@ saveData_fb_logout <- function(data_fb_logout) {
   )
 }
 
+# Function for Feedback recording of logout navbarpage #####################################
+
+fields_fb_frei <- c("frei_fb_inf", "frei_fb_finf", "frei_fb_fazit")   # names of fields to track
+outputDir_fb_frei <- "responses_fb_frei"
+
+saveData_fb_frei <- function(data_fb_frei) {
+  data_fb_frei <- t(data_fb_frei)
+  # Create a unique file name
+  fileName_fb_frei <- sprintf("%s_%s.csv", as.integer(Sys.time()), digest::digest(data_fb_frei))
+  # Write the file to the local system
+  write.csv(
+    x = data_fb_frei,
+    file = file.path(outputDir_fb_frei, fileName_fb_frei), 
+    row.names = FALSE, quote = TRUE
+  )
+}
+
 #######################################################################################################################
 ####                            #######################################################################################
 ####                            #######################################################################################
@@ -227,6 +244,15 @@ saveData_fb_logout <- function(data_fb_logout) {
 #######################################################################################################################
 
 shinyServer(function(input, output, session) {
+
+  #####################################################################################################################
+  # Hide loading message                                                                                   ############
+  #####################################################################################################################  
+  
+  # Hide the loading message when the rest of the server function has executed
+  # hide(id = "loading-content", anim = TRUE, animType = "fade")    
+  # show("app-content")
+  
   
   #####################################################################################################################
   # Test Fingerprinting                                                                                    ############
@@ -265,23 +291,25 @@ shinyServer(function(input, output, session) {
     })
   })
   
+
+
   
   ## Hide further tabs before sucessful login
   
-  observe({
-    hide(selector = c("#navbarpage li a[data-value=einzelfragen]", 
-                      "#navbarpage li a[data-value=qualdim_v1]",
-                      "#navbarpage li a[data-value=qualdim_v2]",
-                      "#navbarpage li a[data-value=freitext_antw]"))
-  })
-  
-  observeEvent(input$loginBtn, {
-    if(login_true() == TRUE)
-      show(selector = c("#navbarpage li a[data-value=einzelfragen]", 
-                        "#navbarpage li a[data-value=qualdim_v1]",
-                        "#navbarpage li a[data-value=qualdim_v2]",
-                        "#navbarpage li a[data-value=freitext_antw]"))
-  })
+  # observe({
+  #   hide(selector = c("#navbarpage li a[data-value=einzelfragen]", 
+  #                     "#navbarpage li a[data-value=qualdim_v1]",
+  #                     "#navbarpage li a[data-value=qualdim_v2]",
+  #                     "#navbarpage li a[data-value=freitext_antw]"))
+  # })
+  # 
+  # observeEvent(input$loginBtn, {
+  #   if(login_true() == TRUE)
+  #     show(selector = c("#navbarpage li a[data-value=einzelfragen]", 
+  #                       "#navbarpage li a[data-value=qualdim_v1]",
+  #                       "#navbarpage li a[data-value=qualdim_v2]",
+  #                       "#navbarpage li a[data-value=freitext_antw]"))
+  # })
   
   #####################################################################################################################
   # Freitext Backend                                                                                       ############
@@ -684,6 +712,31 @@ shinyServer(function(input, output, session) {
   })
   
   
+  ## Feedback for Freitext page ######################################################################################
+  
+  # Reset q2 ###########################################
+  observeEvent(input$frei_fb_btn, {
+    reset("frei_fb_inf")
+    reset("frei_fb_finf")
+    reset("frei_fb_fazit")
+  })
+  
+  # Write Feedback frei ##################################
+  
+  # Whenever a field is filled, aggregate all form data
+  formData_fb_frei <- reactive({
+    data_fb_frei <- sapply(fields_fb_frei, function(x) input[[x]])
+    data_fb_frei$systtime <- paste(Sys.time())
+    data_fb_frei$user <- user()
+    data_fb_frei
+  })
+  
+  # When the Submit button is clicked, save the form data
+  observeEvent(input$frei_fb_btn, {
+    saveData_fb_frei(formData_fb_frei())
+  })
+  
+  
   ## Feedback for logout page ######################################################################################
   
   # Reset logout ###########################################
@@ -762,6 +815,17 @@ shinyServer(function(input, output, session) {
       
       if(input$likertfragen != "nolikert") {
         closeAlert(session, "LikertAlert1")
+      }
+      
+      ## Create Alert for further tabs if Login not successfull
+      
+      if(login_true() == FALSE) {
+        createAlert(session, "loginalert", "Loginalert", title = "Achtung!",
+                    content = "<ul>Deine Login/Passwort-Kombination ist nicht korrekt</ul>", append = FALSE)
+      }
+      
+      if(login_true() == TRUE) {
+        closeAlert(session, "Loginalert")
       }
       
       
