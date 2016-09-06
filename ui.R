@@ -7,8 +7,11 @@ source("helpers.R")
 
 
 #####################################################################################
-# js code for: enter key = simulation of button press                    ############
+# js code for:                                                           ############
+#     -enter key = simulation of button press                            ############
+#     -action button = close app                                         ############
 #####################################################################################
+
 jscode <- '
 $(function() {
 var $els = $("[data-proxy-click]");
@@ -25,7 +28,9 @@ $proxy.click();
 }
 );
 });
+shinyjs.closeWindow = function() { window.close(); }
 '
+
 
 #####################################################################################
 # Calls for Fingerprint                                                  ############
@@ -118,28 +123,51 @@ shinyUI(
                                            actionButton("golikert", "Plot!")
                               ),
                               
-                              mainPanel(
+                              mainPanel(width = 10,
+                               fluidRow(
+                               column(9,   
                                 tags$style(type="text/css",
                                            ".shiny-output-error { visibility: hidden; }",
-                                           ".shiny-output-error:before { visibility: hidden; }"
-                                ),
+                                           ".shiny-output-error:before { visibility: hidden; }"),
+                                fluidRow(
                                 column(6,
                                        bsAlert("likertalert1"),
-                                       svgPanZoomOutput(outputId = "einzelplot")
-                                ),
+                                       svgPanZoomOutput(outputId = "einzelplot")),
                                 column(6,
-                                       plotOutput("gmeaneinzelplot")
-                                ),
+                                       plotOutput("gmeaneinzelplot")),
                                 column(12,
-                                       verbatimTextOutput("pw_conf")
-                                       ),
+                                       verbatimTextOutput("pw_conf")),
 
                                 column(12,
-                                       verbatimTextOutput("glimpse_likertdata3")
-                                ),                                
+                                       verbatimTextOutput("glimpse_likertdata3")),                                
                               
-                              column(12,
+                                column(12,
                                      verbatimTextOutput("user_p"))
+                                )),
+                              
+                              column(3,
+                                     wellPanel(
+                                       h4("Bitte gib uns hin und wieder Feedback zu einem Plot!"),
+                                       div(
+                                         id = "form",
+                                         selectInput("likert_fb_inf", div(HTML("<p>Den aktuell dargestellten Plot finde ich&nbsp;...</p>")),
+                                                     c("..." = NA,
+                                                       "1 = gar nicht informativ " = 1,
+                                                       "2" = 2,
+                                                       "3" = 3,
+                                                       "4" = 4,
+                                                       "5" = 5,
+                                                       "6 = sehr informativ" = 6)),
+                                         textInput("likert_fb_finf", div(HTML("<p>Besonders informativ am aktuell dargestellten Plot finde ich&nbsp;...</p>")),
+                                                   value = "..."),
+                                         textInput("likert_fb_fazit", "Welche Erkenntnisse hast Du für Dich aus dem
+                                          aktuell dargestellten Plot gewinnen können?",
+                                                   value = "..."),
+                                         
+                                         actionButton("likert_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
+                                       )
+                                     ))
+                               )
                               )
                               
                               
@@ -226,6 +254,7 @@ shinyUI(
                                 textInput("qualdim1_fb_fazit", "Welche Erkenntnisse hast Du für Dich aus dem
                                           aktuell dargestellten Plot gewinnen können?",
                                           value = "..."),
+                                
                                 actionButton("qualdim1_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
                                 )
                                 )
@@ -253,8 +282,9 @@ shinyUI(
                               actionButton("goqualdim2", "Plot!")
                             ),
                               
-                            mainPanel(
-                              
+                            mainPanel(width = 9,
+                             fluidRow(
+                             column(9,   
                               bsAlert("qualdim2alert1"),
                               plotOutput("qualdim2plot", height = "500px"),
                               #actionButton("interpretbutton", "Interpretationshilfe für diesen Plot anzeigen"),
@@ -280,10 +310,32 @@ shinyUI(
                               bsButton("help_restq2", label = "Erläuterung dieser Darstellung"),
                               bsModal("urestq2_modal", "Erläuterung der Darstellung", "help_restq2", size = "large",
                                       includeHTML("Stuff/Helpstuff/help_table6.html")))
-                              
+                             ),
+                            column(3,
+                                   wellPanel(
+                                     h4("Bitte gib uns hin und wieder Feedback zu einem Plot!"),
+                                     div(
+                                       id = "form",
+                                       selectInput("qualdim2_fb_inf", div(HTML("<p>Den aktuell dargestellten Plot finde ich&nbsp;...</p>")),
+                                                   c("..." = NA,
+                                                     "1 = gar nicht informativ " = 1,
+                                                     "2" = 2,
+                                                     "3" = 3,
+                                                     "4" = 4,
+                                                     "5" = 5,
+                                                     "6 = sehr informativ" = 6)),
+                                       textInput("qualdim2_fb_finf", div(HTML("<p>Besonders informativ am aktuell dargestellten Plot finde ich&nbsp;...</p>")),
+                                                 value = "..."),
+                                       textInput("qualdim2_fb_fazit", "Welche Erkenntnisse hast Du für Dich aus dem
+                                                 aktuell dargestellten Plot gewinnen können?",
+                                                 value = "..."),
+                                       
+                                       actionButton("qualdim2_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
+                                     )
+                                     )) 
                             )
                         )
-                    ),
+                    )),
 
 
 ###########################################################################
@@ -312,32 +364,69 @@ tabPanel(title = "Freitext-Antworten", value = "freitext_antw",
                      uiOutput("freitextplots")
                      )
            )
-         )
+         ),
 
    
 
+###########################################################################
+# Log-out Site                                                       ######
+###########################################################################
 
-                
-#                    ###########################################################################
-#                    tabPanel("Debug",
-#                             fluidRow(verbatimTextOutput("debug1"),
-#                                      verbatimTextOutput("debug2"))),
-#                    
-#                    
-#                    
-                   ###########################################################################
-#                    tabPanel("Deine Rückmeldung",
-#                             fluidRow(
-#                               
-#                               column(12, div(style = "height:100%;width:100%"),
-#                                      tags$div(
-#                                        HTML("<iframe src='https://www.soscisurvey.de/abiturma/?q=abiturma_fr_q2' 
-#                                             style='border: none; width: 100%; height: 800px;'></iframe>")
-#                                      )
-#                               ))
-#                             
-#                             
-#                    )
+tabPanel(title = "Logout", value = "logout",
+         
+           fluidRow(
+             column(3),
+           
+             column(width = 6,
+                     h2("Feedback und Logout"),
+                     wellPanel(
+                       h3("Dein Feedback zu den Rückmeldeformaten"),
+                       selectInput("glob_fb_likert_inf", div(HTML("<p>Die Einzelantworten fand ich&nbsp;...</p>")),
+                                   c("..." = NA,
+                                     "1 = gar nicht informativ " = 1,
+                                     "2" = 2,
+                                     "3" = 3,
+                                     "4" = 4,
+                                     "5" = 5,
+                                     "6 = sehr informativ" = 6), width = "30%"),
+                       selectInput("glob_fb_q1_inf", div(HTML("<p>Die <b>freie</b> Darstellung der 
+                                                              Qualitätsdimensionen (V1) fand ich&nbsp;...</p>")),
+                                   c("..." = NA,
+                                     "1 = gar nicht informativ " = 1,
+                                     "2" = 2,
+                                     "3" = 3,
+                                     "4" = 4,
+                                     "5" = 5,
+                                     "6 = sehr informativ" = 6), width = "30%"),
+                       selectInput("glob_fb_q2_inf", div(HTML("<p>Die <b>vorgegebene</b> Darstellung der 
+                                                              Qualitätsdimensionen (V2) fand ich&nbsp;...</p>")),
+                                   c("..." = NA,
+                                     "1 = gar nicht informativ " = 1,
+                                     "2" = 2,
+                                     "3" = 3,
+                                     "4" = 4,
+                                     "5" = 5,
+                                     "6 = sehr informativ" = 6), width = "30%"),
+                       selectInput("glob_fb_frei_inf", div(HTML("<p>Die Freitexte fand ich&nbsp;...</p>")),
+                                   c("..." = NA,
+                                     "1 = gar nicht informativ " = 1,
+                                     "2" = 2,
+                                     "3" = 3,
+                                     "4" = 4,
+                                     "5" = 5,
+                                     "6 = sehr informativ" = 6), width = "30%")
+                     ),
+                     wellPanel(
+                     h3("Dein Feedback zu abiturma"),
+                     h5("Hier hast Du Platz für jede Art von Rückmeldungen. (Beispielsweise hinsichtlich unserer Kommunikation 
+                        mit Dir, den Kursunterlagen, der Organisation vor Ort, Deinen Erfahrungen beim Unterrichten etc.)"),
+                     tags$textarea(id="glob_fb_abiturma", rows=5, cols=120, "...")
+                     ),
+                    actionButton("logout_btn", "Feedback abschicken & Logout", icon = icon("off", lib = "glyphicon"))
+           )
+         ))
+
+
 )))
                    
                    

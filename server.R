@@ -163,6 +163,60 @@ saveData_fb_q1 <- function(data_fb_q1) {
   )
 }
 
+
+# Function for Feedback recording of likert navbarpage #####################################
+
+fields_fb_likert <- c("likert_fb_inf", "likert_fb_finf", "likert_fb_fazit")   # names of fields to track
+outputDir_fb_likert <- "responses_fb_likert"
+
+saveData_fb_likert <- function(data_fb_likert) {
+  data_fb_likert <- t(data_fb_likert)
+  # Create a unique file name
+  fileName_fb_likert <- sprintf("%s_%s.csv", as.integer(Sys.time()), digest::digest(data_fb_likert))
+  # Write the file to the local system
+  write.csv(
+    x = data_fb_likert,
+    file = file.path(outputDir_fb_likert, fileName_fb_likert), 
+    row.names = FALSE, quote = TRUE
+  )
+}
+
+
+# Function for Feedback recording of jitter v2 navbarpage #####################################
+
+fields_fb_q2 <- c("qualdim2_fb_inf", "qualdim2_fb_finf", "qualdim2_fb_fazit")   # names of fields to track
+outputDir_fb_q2 <- "responses_fb_q2"
+
+saveData_fb_q2 <- function(data_fb_q2) {
+  data_fb_q2 <- t(data_fb_q2)
+  # Create a unique file name
+  fileName_fb_q2 <- sprintf("%s_%s.csv", as.integer(Sys.time()), digest::digest(data_fb_q2))
+  # Write the file to the local system
+  write.csv(
+    x = data_fb_q2,
+    file = file.path(outputDir_fb_q2, fileName_fb_q2), 
+    row.names = FALSE, quote = TRUE
+  )
+}
+
+
+# Function for Feedback recording of logout navbarpage #####################################
+
+fields_fb_logout <- c("glob_fb_likert_inf", "glob_fb_q1_inf", "glob_fb_q2_inf", "glob_fb_frei_inf", "glob_fb_abiturma")   # names of fields to track
+outputDir_fb_logout <- "responses_fb_logout"
+
+saveData_fb_logout <- function(data_fb_logout) {
+  data_fb_logout <- t(data_fb_logout)
+  # Create a unique file name
+  fileName_fb_logout <- sprintf("%s_%s.csv", as.integer(Sys.time()), digest::digest(data_fb_logout))
+  # Write the file to the local system
+  write.csv(
+    x = data_fb_logout,
+    file = file.path(outputDir_fb_logout, fileName_fb_logout), 
+    row.names = FALSE, quote = TRUE
+  )
+}
+
 #######################################################################################################################
 ####                            #######################################################################################
 ####                            #######################################################################################
@@ -555,6 +609,31 @@ shinyServer(function(input, output, session) {
   # Backend Feedbackforms                                                                                  ############
   #####################################################################################################################
   
+  ## Feedback for likert page ######################################################################################
+  
+  # Reset likert form ###########################################
+  observeEvent(input$likert_fb_btn, {
+    reset("likert_fb_inf")
+    reset("likert_fb_finf")
+    reset("likert_fb_fazit")
+  })
+  
+  # Write Feedback likert ##################################
+  
+  # Whenever a field is filled, aggregate all form data
+  formData_fb_likert <- reactive({
+    data_fb_likert <- sapply(fields_fb_likert, function(x) input[[x]])
+    data_fb_likert$systtime <- paste(Sys.time())
+    data_fb_likert$user <- user()
+    data_fb_likert
+  })
+  
+  # When the Submit button is clicked, save the form data
+  observeEvent(input$likert_fb_btn, {
+    saveData_fb_likert(formData_fb_likert())
+  })
+  
+  
   ## Feedback for Qualdim 1 page ######################################################################################
   
   # Reset q1 ###########################################
@@ -577,6 +656,58 @@ shinyServer(function(input, output, session) {
   # When the Submit button is clicked, save the form data
   observeEvent(input$qualdim1_fb_btn, {
     saveData_fb_q1(formData_fb_q1())
+  })
+  
+  
+  ## Feedback for Qualdim 2 page ######################################################################################
+  
+  # Reset q2 ###########################################
+  observeEvent(input$qualdim2_fb_btn, {
+    reset("qualdim2_fb_inf")
+    reset("qualdim2_fb_finf")
+    reset("qualdim2_fb_fazit")
+  })
+  
+  # Write Feedback q2 ##################################
+  
+  # Whenever a field is filled, aggregate all form data
+  formData_fb_q2 <- reactive({
+    data_fb_q2 <- sapply(fields_fb_q2, function(x) input[[x]])
+    data_fb_q2$systtime <- paste(Sys.time())
+    data_fb_q2$user <- user()
+    data_fb_q2
+  })
+  
+  # When the Submit button is clicked, save the form data
+  observeEvent(input$qualdim2_fb_btn, {
+    saveData_fb_q2(formData_fb_q2())
+  })
+  
+  
+  ## Feedback for logout page ######################################################################################
+  
+  # Reset logout ###########################################
+  # observeEvent(input$qualdim2_fb_btn, {
+  #   reset("qualdim2_fb_inf")
+  #   reset("qualdim2_fb_finf")
+  #   reset("qualdim2_fb_fazit")
+  # })
+  
+  # Write Feedback logout ##################################
+  
+  # Whenever a field is filled, aggregate all form data
+  formData_fb_logout <- reactive({
+    data_fb_logout <- sapply(fields_fb_logout, function(x) input[[x]])
+    data_fb_logout$systtime <- paste(Sys.time())
+    data_fb_logout$user <- user()
+    data_fb_logout
+  })
+  
+  # When the Submit button is clicked, save the form data, terminate app and close window
+  observeEvent(input$logout_btn, {
+    saveData_fb_logout(formData_fb_logout())
+    js$closeWindow()
+    stopApp()
   })
   
   #####################################################################################################################

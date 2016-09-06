@@ -5,6 +5,11 @@ responses_jitter/
 responses_likert/
 responses_freitext/
 responses_qualdim2/
+responses_fb_q1/
+responses_fb_q2/
+responses_fb_likert/
+responses_fb_frei/
+responses_fb_logout/
 data/
 data/freitextbilder_questor1/
 data/freitextbilder_questor2/
