@@ -31,6 +31,28 @@ $proxy.click();
 shinyjs.closeWindow = function() { window.close(); }
 '
 
+#####################################################################################
+# CSS adaption for plot-spinner                                          ############
+#####################################################################################
+
+mycss <- "
+#plot-container {
+  position: relative;
+}
+#loading-spinner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: -1;
+  margin-top: -33px;  /* half of the spinner's height */
+  margin-left: -33px; /* half of the spinner's width */
+}
+#plot.recalculating {
+  z-index: -2;
+}
+"
+
+
 
 #####################################################################################
 # Calls for Fingerprint                                                  ############
@@ -123,6 +145,7 @@ shinyUI(
                               ),
                               
                               mainPanel(width = 10,
+                               tags$head(tags$style(HTML(mycss))),                  ## calls CSS adaption for plot-spinner
                                fluidRow(
                                column(9,   
                                 tags$style(type="text/css",
@@ -222,7 +245,6 @@ shinyUI(
                                 bsAlert("loginalert2"),
                                 bsAlert("jitteralert1"),
                                 h2("Dein Plot"),
-                                
                                 uiOutput("jitter.plot.ui"),
                                 hr(),
                                 bsModal("qualdimhelpjitter", "Auswahl der Qualitätsdimensionen", "jitterqualdimmodalbt", size = "small",

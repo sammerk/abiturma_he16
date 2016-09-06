@@ -365,15 +365,15 @@ shinyServer(function(input, output, session) {
   freitextplotgone <- eventReactive(input$gofreitext,{  
     
     ## Create Alert for freitext tab if Login not successfull
-    
-    if(login_true() == FALSE) {
-      createAlert(session, "loginalert4", "Loginalert4", title = "Achtung!",
-                  content = "<ul>Deine Login/Passwort-Kombination ist nicht korrekt</ul>", append = FALSE)
-    }
-    
-    if(login_true() == TRUE) {
-      closeAlert(session, "Loginalert4")
-    }
+      
+      if(login_true() == FALSE) {
+        createAlert(session, "loginalert4", "Loginalert4", title = "Achtung!",
+                    content = "<ul>Deine Login/Passwort-Kombination ist nicht korrekt</ul>", append = FALSE)
+      }
+      
+      if(login_true() == TRUE) {
+        closeAlert(session, "Loginalert4")
+      }
     
     plot_output_list <- lapply(1:length((freitextdata2()$ftk)), function(i) {
       plotname <- paste("freitextplot", i, sep="")
