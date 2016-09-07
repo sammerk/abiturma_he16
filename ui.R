@@ -37,18 +37,18 @@ shinyjs.closeWindow = function() { window.close(); }
 
 mycss <- "
 #plot-container {
-  position: relative;
+position: relative;
 }
 #loading-spinner {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: -1;
-  margin-top: -33px;  /* half of the spinner's height */
-  margin-left: -33px; /* half of the spinner's width */
+position: absolute;
+left: 50%;
+top: 50%;
+z-index: -1;
+margin-top: -33px;  /* half of the spinner's height */
+margin-left: -33px; /* half of the spinner's width */
 }
 #plot.recalculating {
-  z-index: -2;
+z-index: -2;
 }
 "
 
@@ -149,8 +149,6 @@ shinyUI(
                               ),
                               
                               mainPanel(width = 10,
-                              # tags$head(tags$style(HTML(mycss))),                  ## calls CSS adaption for plot-spinner
-                              
                                fluidRow(
                                column(9,   
                                 tags$style(type="text/css",
@@ -312,9 +310,14 @@ shinyUI(
                             mainPanel(width = 9,
                              fluidRow(
                              column(9,
+                                    tags$head(tags$style(HTML(mycss))), # for plot spinner
                               bsAlert("loginalert3"),
                               bsAlert("qualdim2alert1"),
-                              plotOutput("qualdim2plot", height = "500px"),
+                              hidden(
+                              div(id = "plot-container",
+                                  tags$img(src = "spinner.gif",
+                                           id = "loading-spinner"),
+                              imageOutput("qualdim2plot"))),
                               #actionButton("interpretbutton", "Interpretationshilfe für diesen Plot anzeigen"),
                               #uiOutput("interpretationshilfe.ui")
                               conditionalPanel("input.qualdim2 == 'gmean'",

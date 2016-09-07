@@ -1008,8 +1008,15 @@ shinyServer(function(input, output, session) {
   # Qualdim2 Backend                                                                                       ############ 
   #####################################################################################################################
   
+  
+  observeEvent(input$goqualdim2,{
+    show("plot-container")
+  })
+  
+  
   qualdim2plotgone <- eventReactive(input$goqualdim2,{     
     
+
     ## Create Alert for qualdim2 tab if Login not successfull
     
     if(login_true() == FALSE) {
@@ -1054,16 +1061,17 @@ shinyServer(function(input, output, session) {
                   aes(x=variable, y= value, fill = mggroup)) + geom_boxplot(outlier.shape = NA) + 
         geom_point(pch = 21, position = position_jitterdodge(jitter.width = 0.2))
       
-      p <- p + theme(axis.text.x  = element_text(angle = 55, hjust = 1, colour = "black", size = 11),
+      p <- p + theme(axis.text.x  = element_text(angle = 15, hjust = 1, colour = "black", size = 7),
                      panel.grid.minor = element_blank(),
                      panel.grid.major.x = element_blank(),
                      legend.title=element_blank(),
-                     legend.text = element_text(size = 11)) + 
+                     legend.text = element_text(size = 6, lineheight = 1.3),
+                     axis.title.y  = element_text(colour = "#A51E37", size = 7, lineheight = 1.3)) + 
         
         coord_cartesian(ylim=c(0.8, 7.2)) +  labs(x = "", y = "1 = trifft überhaupt nicht zu...\n...7 = trifft vollständig zu") + scale_y_continuous(breaks=c(1:7)) +
         guides(fill=guide_legend(
-          keywidth=0.3,
-          keyheight=0.6,
+          keywidth=0.15,
+          keyheight=0.3,
           default.unit="inch")
         )  
     }
@@ -1074,9 +1082,10 @@ shinyServer(function(input, output, session) {
                   aes(x=variable, y= value)) + geom_boxplot(width = 0.35, colour = "#3997FA", fill = NA, outlier.shape = NA, size = 1.1) + 
         geom_jitter(pch = 21, width = 0.1)
       
-      p <- p + theme(axis.text.x  = element_text(angle = 55, hjust = 1, colour = "black", size = 11),
+      p <- p + theme(axis.text.x  = element_text(angle = 15, hjust = 1, colour = "black", size = 7),
                      panel.grid.minor = element_blank(),
-                     panel.grid.major.x = element_blank()) +
+                     panel.grid.major.x = element_blank(),
+                     axis.title.y  = element_text(colour = "#A51E37", size = 7, lineheight = 1.3)) +
         coord_cartesian(ylim=c(0.8, 7.2)) +  labs(y = "1 = trifft überhaupt nicht zu...\n...7 = trifft vollständig zu", x = "") + scale_y_continuous(breaks=c(1:7))
     } 
     
@@ -1088,17 +1097,17 @@ shinyServer(function(input, output, session) {
         geom_hline(yintercept = 0, colour = "#A51E37")
       
       
-      p <- p + theme(axis.text.x  = element_text(angle = 55, hjust = 1, colour = "black", size = 11),
-                     axis.title.y  = element_text(colour = "#A51E37", size = rel(1.15)),
+      p <- p + theme(axis.text.x  = element_text(angle = 15, hjust = 1, colour = "black", size = 7),
+                     axis.title.y  = element_text(colour = "#A51E37", size = 7),
                      panel.grid.minor = element_blank(),
                      panel.grid.major.x = element_blank(),
                      legend.title=element_blank(),
-                     legend.text = element_text(size = 11)) + 
+                     legend.text = element_text(size = 6, lineheight = 1.2)) + 
         
         coord_cartesian(ylim=c(-4, 3)) +  labs(x = "", y = "Mittelwert je TeilnehmerIn = 0") + scale_y_continuous(breaks=c(-4:3)) +
         guides(fill=guide_legend(
-          keywidth=0.3,
-          keyheight=0.6,
+          keywidth=0.15,
+          keyheight=0.3,
           default.unit="inch")
         )  
     }      
@@ -1112,29 +1121,47 @@ shinyServer(function(input, output, session) {
         geom_jitter(pch = 21, width = 0.1) +
         geom_hline(yintercept = 0, colour = "#A51E37")
       
-      p <- p + theme(axis.title.y  = element_text(colour = "#A51E37", size = rel(1.15)),
-                     axis.text.x  = element_text(angle = 55, hjust = 1, colour = "black", size = 11),
+      p <- p + theme(axis.title.y  = element_text(colour = "#A51E37", size = 7),
+                     axis.text.x  = element_text(angle = 15, hjust = 1, colour = "black", size = 7),
                      panel.grid.minor = element_blank(),
                      panel.grid.major.x = element_blank(),
                      legend.title=element_blank(),
-                     legend.text = element_text(size = 11)) + labs(x = "", y = "Mittelwert abiturma = 0 (je Dimension)") +
+                     legend.text = element_text(size = 7)) + labs(x = "", y = "Mittelwert abiturma = 0 (je Dimension)") +
         guides(fill=guide_legend(
-          keywidth=0.3,
-          keyheight=0.6,
+          keywidth=0.1,
+          keyheight=0.15,
           default.unit="inch")
         )  
     }  
     
-    p
+    # Create .svg as tempfile ############################################################################
+    # fetch clientdata
+    width  <- session$clientData$output_qualdim2plot_width
+    height <- session$clientData$output_qualdim2plot_height
+    mysvgwidth <-  width/96
+    mysvgheight <- height/96
+    pixelratio <- session$clientData$pixelratio
     
+    # A temp file to save the output.
+    qualdimplot2_temp <- tempfile(fileext='.svg')
+    
+    # Generate the svg
+    ggsave(file=qualdimplot2_temp, plot=p, width=mysvgwidth*pixelratio, height=mysvgheight*pixelratio)
+    
+    # Return a list containing the filename
+    list(src = normalizePath(qualdimplot2_temp),
+         contentType = 'image/svg+xml',
+         width = width,
+         height = height,
+         alt = "My svg Histogram")
     })
   
   
   # Call of qualidim2plotgone() & Interprethilfe  mit Actionbutton  ####################################################
-  output$qualdim2plot <- renderPlot({
+  output$qualdim2plot <- renderImage({
     if(login_true() == T)
     qualdim2plotgone()
-  }, res = 72)  
+  })  
   
   
   # Reaktive Interpretationshilfe erstellen       ######################################################################
