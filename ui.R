@@ -141,11 +141,16 @@ shinyUI(
                                            checkboxGroupInput("groupinl", tags$strong("Vergleich"),
                                                               choices = sample(c("Mit allen abiturma-Kursen vergleichen" = "gmean"))),
                                            hr(),
-                                           actionButton("golikert", "Plot!")
+                                           actionButton("golikert", "Plot!", icon = icon("bar-chart-o", lib = "font-awesome")),
+                                           hidden(
+                                             div(id = "loading_message_likert",
+                                                 helpText("(Erstellung des Plots dauert einige Sekunden)")
+                                             ))
                               ),
                               
                               mainPanel(width = 10,
-                               tags$head(tags$style(HTML(mycss))),                  ## calls CSS adaption for plot-spinner
+                              # tags$head(tags$style(HTML(mycss))),                  ## calls CSS adaption for plot-spinner
+                              
                                fluidRow(
                                column(9,   
                                 tags$style(type="text/css",

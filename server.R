@@ -831,7 +831,7 @@ shinyServer(function(input, output, session) {
   
   likertdata3 <- 
     eventReactive(input$golikert, { 
-      
+      show(id = "loading_message_likert", anim = TRUE)
       # Alerts ###################################################################################################
       
       ## none-selection alert
@@ -930,9 +930,9 @@ shinyServer(function(input, output, session) {
        likertdata2b <-likertdata2b%>%
        filter(gmgroup == "Deine Kurse")
        }
-      
+       
       return(likertdata2b)
-        
+       
       })
   
   ## Debug  #################################################################################################
@@ -981,7 +981,9 @@ shinyServer(function(input, output, session) {
                    panel.grid.minor = element_blank(),
                    panel.border = element_blank())
     if(login_true() == T)
+    delay(7000, hide(id = "loading_message_likert", anim = TRUE))
     svgPanZoom(testp, controlIconsEnabled = T)
+    
   })
   
   
