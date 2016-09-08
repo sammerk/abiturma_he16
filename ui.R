@@ -250,6 +250,7 @@ shinyUI(
                                 bsAlert("loginalert2"),
                                 bsAlert("jitteralert1"),
                                 h2("Dein Plot"),
+                                imageOutput("qualdimplot_svg"),
                                 uiOutput("jitter.plot.ui"),
                                 hr(),
                                 bsModal("qualdimhelpjitter", "Auswahl der Qualitätsdimensionen", "jitterqualdimmodalbt", size = "small",

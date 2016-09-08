@@ -613,6 +613,36 @@ shinyServer(function(input, output, session) {
   )
   })
   
+  # Qualdimplot as svg ###############################################################################
+  
+  list_of_qualdimplot <- eventReactive(input$goqualdim, {
+                               width_q1  <- session$clientData$output_qualdimplot_svg_width
+                               height_q1 <- session$clientData$output_qualdimplot_svg_height
+                               mysvgwidth_q1 <- width_q1/96
+                               mysvgheight_q1 <- height_q1/96
+                               
+                               # A temp file to save the output.
+                               # This file will be removed later by renderImage
+                               
+                               outfile_q1 <- tempfile(fileext='.svg')
+                               
+                               #This actually save the plot in a image
+                               ggsave(file=outfile_q1, plot=qualdimplotgone(), width=mysvgwidth_q1, height=mysvgheight_q1)
+                               
+                               # Return a list containing the filename
+                               list(src = normalizePath(outfile_q1),
+                                    contentType = 'image/svg+xml',
+                                    width = width_q1,
+                                    height = height_q1,
+                                    alt = "My svg Histogram")
+  })
+  
+  output$qualdimplot_svg <- renderImage({
+      list_of_qualdimplot()
+  }) 
+  
+  
+  
   # Call of qualidimplotgone() mit Actionbutton  ######################################################################
   output$qualdimplot <- renderPlot({
     qualdimplotgone()
