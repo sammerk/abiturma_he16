@@ -1008,11 +1008,9 @@ shinyServer(function(input, output, session) {
   # Qualdim2 Backend                                                                                       ############ 
   #####################################################################################################################
   
-  
   observeEvent(input$goqualdim2,{
     show("plot-container")
   })
-  
   
   qualdim2plotgone <- eventReactive(input$goqualdim2,{     
     
