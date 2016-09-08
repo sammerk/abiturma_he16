@@ -464,6 +464,7 @@ shinyServer(function(input, output, session) {
   
   qualdimplotgone <- eventReactive(input$goqualdim,{     
     
+    
     ## Create Alert for q1 tab if Login not successfull
     
     if(login_true() == FALSE) {
@@ -596,6 +597,12 @@ shinyServer(function(input, output, session) {
     p
     })
   
+  
+  # Kursanzahl extrahieren für adaptive plotheight ####################################################################  
+  n_lev_mg <- eventReactive(input$golikert, {nlevdata <- kursdata1()%>%      #Count of teached courses by actual user
+    filter(kursleiterin == user())
+  return(nlevels(as.factor(nlevdata$kurs)))})
+  
   # Adaptive Plotheight for Jitter-Plot ###############################################################################
   
   n_lev_mg <- eventReactive(input$goqualdim, {nlevdata <- kursdata1()%>%                # Count of teached courses by actual user
@@ -613,35 +620,51 @@ shinyServer(function(input, output, session) {
   )
   })
   
-  # Qualdimplot as svg ###############################################################################
+ # # Qualdimplot as svg ###############################################################################
+ # 
+ # list_of_qualdimplot <- eventReactive(input$goqualdim, {
+ #                              width_q1  <- session$clientData$output_qualdimplot_svg_width
+ #                              height_q1 <- session$clientData$output_qualdimplot_svg_height
+ #                              mysvgwidth_q1 <- width_q1/96
+ #                              mysvgheight_q1 <- height_q1/96*ifelse("kurse" %in% input$groupin & "gmean" %in% input$groupin,
+ #                                                                   ceiling((as.numeric(n_lev_mg())+1)/3),
+ #                                                                 ifelse("kurse" %in% input$groupin & !"gmean" %in% input$groupin,
+ #                                                                        ceiling((as.numeric(n_lev_mg()))/3),
+ #                                                                        1
+ #                                                                        )
+ #                                                                   )
+ #                              
+ #                              # A temp file to save the output.
+ #                              # This file will be removed later by renderImage
+ #                              
+ #                              outfile_q1 <- tempfile(fileext='.svg')
+ #                              
+ #                              #This actually save the plot in a image
+ #                              ggsave(file=outfile_q1, plot=qualdimplotgone(), width=mysvgwidth_q1, height=mysvgheight_q1)
+ #                              
+ #                              # Return a list containing the filename
+ #                              list(src = normalizePath(outfile_q1),
+ #                                   contentType = 'image/svg+xml',
+ #                                   width = width_q1,
+ #                                   height = height_q1*ifelse("kurse" %in% input$groupin & "gmean" %in% input$groupin,
+ #                                                             ceiling((as.numeric(n_lev_mg())+1)/3),
+ #                                                             ifelse("kurse" %in% input$groupin & !"gmean" %in% input$groupin,
+ #                                                                    ceiling((as.numeric(n_lev_mg()))/3),
+ #                                                                    1
+ #                                                                    )
+ #                                                             ),
+ #                                   alt = "My svg Histogram")
+ # })
+ # 
+ # output$qualdimplot_svg <- renderImage({
+ #     list_of_qualdimplot()
+ # }) 
   
-  list_of_qualdimplot <- eventReactive(input$goqualdim, {
-                               width_q1  <- session$clientData$output_qualdimplot_svg_width
-                               height_q1 <- session$clientData$output_qualdimplot_svg_height
-                               mysvgwidth_q1 <- width_q1/96
-                               mysvgheight_q1 <- height_q1/96
-                               
-                               # A temp file to save the output.
-                               # This file will be removed later by renderImage
-                               
-                               outfile_q1 <- tempfile(fileext='.svg')
-                               
-                               #This actually save the plot in a image
-                               ggsave(file=outfile_q1, plot=qualdimplotgone(), width=mysvgwidth_q1, height=mysvgheight_q1)
-                               
-                               # Return a list containing the filename
-                               list(src = normalizePath(outfile_q1),
-                                    contentType = 'image/svg+xml',
-                                    width = width_q1,
-                                    height = height_q1,
-                                    alt = "My svg Histogram")
+  # show qualdimplot1spinner
+  
+  observeEvent(input$goqualdim, {
+    show("qualdimplot1-container")
   })
-  
-  output$qualdimplot_svg <- renderImage({
-      list_of_qualdimplot()
-  }) 
-  
-  
   
   # Call of qualidimplotgone() mit Actionbutton  ######################################################################
   output$qualdimplot <- renderPlot({
@@ -942,7 +965,7 @@ shinyServer(function(input, output, session) {
   
   ## Debug  #################################################################################################
   
-  output$glimpse_likertdata3 <- renderPrint({glimpse(likertdata3())})
+  output$glimpse_likertdata3 <- renderPrint({n_lev_mg()})
   output$user_p <- renderPrint({user()})
   output$pw_conf <- renderPrint({input$likertfragen})
   
