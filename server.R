@@ -641,24 +641,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  ##  debug non zero grand means
-  
-  
-  #       output$debugjitterdata <- 
-  #         
-  # 
-  #       DT::renderDataTable({
-  #         
-  #         kursdata1()%>%
-  #           group_by(gmgroup, variable)%>%
-  #           summarize(mw = mean(value.std, na.rm = T))
-  #       })
-  #       
-  #     output$jitterplot2 <- renderPlot({
-  #       ggplot(kursdata1(), 
-  #              aes(x=variable, y= value.std))  + geom_blank()    + facet_wrap(~  gmgroup, ncol = 3) + stat_sum_single(mean)
-  #     })
-  
+
   #####################################################################################################################
   # Backend Feedbackforms                                                                                  ############
   #####################################################################################################################
@@ -765,13 +748,6 @@ shinyServer(function(input, output, session) {
   
   ## Feedback for logout page ######################################################################################
   
-  # Reset logout ###########################################
-  # observeEvent(input$qualdim2_fb_btn, {
-  #   reset("qualdim2_fb_inf")
-  #   reset("qualdim2_fb_finf")
-  #   reset("qualdim2_fb_fazit")
-  # })
-  
   # Write Feedback logout ##################################
   
   # Whenever a field is filled, aggregate all form data
@@ -831,7 +807,6 @@ shinyServer(function(input, output, session) {
   
   likertdata3 <- 
     eventReactive(input$golikert, { 
-      show(id = "loading_message_likert", anim = TRUE)
       # Alerts ###################################################################################################
       
       ## none-selection alert
@@ -946,23 +921,21 @@ shinyServer(function(input, output, session) {
   
   # Create Einzelplots #################################################################################################
   
-  # Farbpalette
+  # Colorpalette
   cbPalette <- c("#A51E37", "#D8516A", "#FF849D", "#F8F8F8", "#95C3DF", "#497793", "#002A46")
   
-  # Einzelplot ohne grouping
+  # Einzelplot with reactive grouping
   einzelplot_s <- eventReactive(input$golikert, {                   
        likertplot <- ggplot(likertdata3(), aes(x=gmgroup, y = Freq_per, fill = value)) + geom_bar(stat='identity') + 
              coord_flip() + facet_wrap(~variable, ncol =1)   + 
              ggtitle("Deine Kurse Frühjahr '16") +
-             # scale_colour_manual(values=cbPalette) +
              scale_fill_manual(limits = c("1 = trifft überhaupt nicht zu", "2","3" ,"4","5" ,"6","7 = trifft vollständig zu"),
-                               labels = c("1 = trifft überhaupt nicht zu", "2","3" ,"4","5" ,"6","7 = trifft vollständig zu"), values=cbPalette) +
+                               labels = c("1 = trifft überhaupt nicht zu", "2","3" ,"4","5" ,"6","7 = trifft vollständig zu"), values = cbPalette) +
              guides(fill = guide_legend(nrow = 1)) +
              theme(legend.title=element_blank(), legend.position = "top",
-                 #  axis.ticks = element_blank(), axis.text.x = element_blank(),
-                   axis.text.y = element_blank(),
-                   strip.text.x = element_text(size = 11),
-                 #  axis.title.x = element_blank(), axis.title.y = element_blank(),
+                   axis.title.y = element_blank(),
+                   axis.title.x = element_blank(),
+                   strip.text.x = element_text(size = 9),
                    plot.background = element_blank(),
                    panel.grid.major = element_blank(),
                    panel.grid.minor = element_blank(),
@@ -976,8 +949,8 @@ shinyServer(function(input, output, session) {
   list_of_likertplot <- eventReactive(input$golikert, {
                               width_l  <- session$clientData$output_einzelplot_width
                               height_l <- session$clientData$output_einzelplot_height
-                              mysvgwidth_l <- width_l/96
-                              mysvgheight_l <- height_l/96
+                              mysvgwidth_l <- width_l/96*1.35
+                              mysvgheight_l <- height_l/96*1.35*ifelse(input$likertfragen == "Beziehung",0.7,1)
                               
                               # A temp file to save the output.
                               # This file will be removed later by renderImage
@@ -993,6 +966,10 @@ shinyServer(function(input, output, session) {
                                    width = width_l,
                                    height = height_l,
                                    alt = "My svg Histogram")
+  })
+  
+  observeEvent(input$golikert,{
+    show("likert-plot-container")
   })
   
   output$einzelplot <- renderImage({

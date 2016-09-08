@@ -158,7 +158,10 @@ shinyUI(
                                 column(12,
                                        bsAlert("loginalert"),
                                        bsAlert("likertalert1"),
-                                       imageOutput("einzelplot")),
+                                       hidden(div(id = "likert-plot-container",
+                                                  tags$img(src = "spinner.gif",
+                                                           id = "loading-spinner"),
+                                       imageOutput("einzelplot")))),
 
                                 column(12,
                                        verbatimTextOutput("pw_conf")),
