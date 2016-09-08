@@ -950,21 +950,8 @@ shinyServer(function(input, output, session) {
   cbPalette <- c("#A51E37", "#D8516A", "#FF849D", "#F8F8F8", "#95C3DF", "#497793", "#002A46")
   
   # Einzelplot ohne grouping
-  output$einzelplot <- renderSvgPanZoom({                    # Da keine reactives enthalten sind
-   # likertdata4 <- likertdata3()%>%                          # bzw. likertdata3() via input$golikert
-    #  mutate(gmgroup = factor(gmgroup))%>%                   # isoliert ist, kann dies hier voll reaktiv sein
-             #variable = ifelse(variable == "Der/die Kursleiter/in hält Dein Interesse während des Kurses durch seinen/ihren Unterrichtsstil aufrecht.",
-             #                  "Der/die Kursleiter/in hält Dein Interesse während des Kurses\ndurch seinen/ihren Unterrichtsstil aufrecht.",
-             #                  ifelse(variable == "Die Kursteilnehmer/innen werden ermutigt, eigene Lösungswege zu formulieren und/oder die vorgetragenen Lösungen kritisch zu hinterfragen.",
-             #                         "Die Kursteilnehmer/innen werden ermutigt, eigene Lösungswege zu\nformulieren und/oder die vorgetragenen Lösungen kritisch zu hinterfragen.",
-             #                         ifelse(variable == "Der/die Kursleiter/in gibt den Teilnehmenden das Gefühl, jederzeit um Hilfe bitten zu können.",
-             #                                "Der/die Kursleiter/in gibt den Teilnehmenden das Gefühl,\njederzeit um Hilfe bitten zu können.", 
-             #                                ifelse(variable == "Die Kursteilnehmer/innen werden eingeladen, eigene Ideen und Lösungswege mitzuteilen.",
-             #                                       "Die Kursteilnehmer/innen werden eingeladen, eigene\nIdeen und Lösungswege mitzuteilen.", variable)))))%>%
-      #filter(gmgroup == "Deine Kurse",  ## nicht mehr nötig nach table operation die zu likertdata2a führt
-      #       is.na(value) == FALSE)
-    
-    testp <- ggplot(likertdata3(), aes(x=gmgroup, y = Freq_per, fill = value)) + geom_bar(stat='identity') + 
+  einzelplot_s <- eventReactive(input$golikert, {                   
+       likertplot <- ggplot(likertdata3(), aes(x=gmgroup, y = Freq_per, fill = value)) + geom_bar(stat='identity') + 
              coord_flip() + facet_wrap(~variable, ncol =1)   + 
              ggtitle("Deine Kurse Frühjahr '16") +
              # scale_colour_manual(values=cbPalette) +
@@ -980,13 +967,37 @@ shinyServer(function(input, output, session) {
                    panel.grid.major = element_blank(),
                    panel.grid.minor = element_blank(),
                    panel.border = element_blank())
-    if(login_true() == T)
-    delay(7000, hide(id = "loading_message_likert", anim = TRUE))
-    svgPanZoom(testp, controlIconsEnabled = T)
+    
+       likertplot
     
   })
   
   
+  list_of_likertplot <- eventReactive(input$golikert, {
+                              width_l  <- session$clientData$output_einzelplot_width
+                              height_l <- session$clientData$output_einzelplot_height
+                              mysvgwidth_l <- width_l/96
+                              mysvgheight_l <- height_l/96
+                              
+                              # A temp file to save the output.
+                              # This file will be removed later by renderImage
+                              
+                              outfile_l <- tempfile(fileext='.svg')
+                              
+                              #This actually save the plot in a image
+                              ggsave(file=outfile_l, plot=einzelplot_s(), width=mysvgwidth_l, height=mysvgheight_l)
+                              
+                              # Return a list containing the filename
+                              list(src = normalizePath(outfile_l),
+                                   contentType = 'image/svg+xml',
+                                   width = width_l,
+                                   height = height_l,
+                                   alt = "My svg Histogram")
+  })
+  
+  output$einzelplot <- renderImage({
+    list_of_likertplot()
+  })
  
   # Usage tracking likertplot ###########################################################################################
   

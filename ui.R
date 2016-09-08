@@ -158,7 +158,7 @@ shinyUI(
                                 column(12,
                                        bsAlert("loginalert"),
                                        bsAlert("likertalert1"),
-                                       svgPanZoomOutput(outputId = "einzelplot", width = "100%", height = "600px")),
+                                       imageOutput("einzelplot")),
 
                                 column(12,
                                        verbatimTextOutput("pw_conf")),
