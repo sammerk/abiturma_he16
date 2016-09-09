@@ -69,10 +69,13 @@ inputUserid <- function(inputId, value='') {
 
 inputIp <- function(inputId, value=''){
   tagList(
+    #js für Fingerprint und ip-Adresse
     singleton(tags$head(tags$script(src = "js/md5.js", type='text/javascript'))),
     singleton(tags$head(tags$script(src = "js/shinyBindings.js", type='text/javascript'))),
     tags$body(onload="setvalues()"),
     tags$input(id = inputId, class = "ipaddr", value=as.character(value), type="text", style="display:none;"),
+    
+    # css und js für abiturmastyle
     singleton(tags$head(tags$script(src = "https://www.abiturma.de/unterrichtsfeedback_dateien/js/script.js", type='text/javascript'))), #$$
     tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://www.abiturma.de/unterrichtsfeedback_dateien/style.css")), #$$
     tags$head(tags$title("Unterrichtsfeedback")) #$$
@@ -156,7 +159,14 @@ shinyUI(
                                            ".shiny-output-error:before { visibility: hidden; }"),
                                 fluidRow(
                                 column(12,
-                                       bsAlert("loginalert"),
+                                       p(id = "loginwarning", div(HTML("<div style='display: block;' class='btn-err'>
+                                                          <div>
+                                                            <i class='fa fa-exclamation-circle'></i>
+                                                            <b>Error: </b>
+                                                            <span class='btn-err-msg'>Login Passwort Kombi ist falsch!</span>
+                                                          </div>
+                                                        </div>
+                                          "))),
                                        bsAlert("likertalert1"),
                                        hidden(div(id = "likert-plot-container",
                                                   tags$img(src = "spinner.gif",
@@ -247,7 +257,7 @@ shinyUI(
                               mainPanel(width = 10,
                                fluidRow(
                                column(9,
-                                bsAlert("loginalert2"),
+                                p(id = "loginwarning2", "Achtung: Login-Passwort-Kombination ist falsch!"),
                                 bsAlert("jitteralert1"),
                                 h2("Dein Plot"),
                                 #imageOutput("qualdimplot_svg"),
@@ -319,7 +329,7 @@ shinyUI(
                              fluidRow(
                              column(9,
                                     tags$head(tags$style(HTML(mycss))), # for plot spinner
-                              bsAlert("loginalert3"),
+                              p(id = "loginwarning3", "Achtung: Login-Passwort-Kombination ist falsch!"),
                               bsAlert("qualdim2alert1"),
                               hidden(
                               div(id = "plot-container",
@@ -395,15 +405,19 @@ tabPanel(title = "Freitext-Antworten", value = "freitext_antw",
            mainPanel(width = 9,
               fluidRow(
                 column(9,
-                     bsAlert("loginalert4"),
-                     h3("Deine Freitexte (nur Winter/Frühjahr '16)"),
+                     p(id = "loginwarning4", "Achtung: Login-Passwort-Kombination ist falsch!"),
+                     h3("Deine Freitexte (nur Herbst '16)"),
                      p("Bitte über Sortierung entscheiden. \n
                        Dann erscheinen einige Sekunden nach Drücken des \"Freitexte Anzeigen\" 
                        Buttons die Freitexte deiner KursteilnehmerInnen. \n
                        Hast du die Option \"absteigende Gesamtbewertung\" ausgewählt, werden die Freitexte nach den 
                        Bewertungen in den Qualitätsdimensionen sortiert: Oben stehen die Freitexte von TeilnehmerInnen die dich 
                        am besten bewertet haben."),
-                     uiOutput("freitextplots")
+                     hidden(
+                     div(id = "freitext-container",
+                         tags$img(src = "spinner.gif",
+                                  id = "loading-spinner"),
+                     uiOutput("freitextplots")))
                      ),
                column(3,
                      wellPanel(
