@@ -815,11 +815,22 @@ shinyServer(function(input, output, session) {
   })
   
   # When the Submit button is clicked, save the form data, terminate app and close window
-  observeEvent(input$logout_btn, {
+
+     observeEvent(input$logout_btn, {
     saveData_fb_logout(formData_fb_logout())
+     reset("glob_fb_likert_inf")
+     reset("glob_fb_q1_inf")
+     reset("glob_fb_frei_inf")
+     reset("glob_fb_q2_inf")
+     reset("glob_fb_abiturma")
+     reset("username")
+     reset("passw")
     js$closeWindow()
     stopApp()
   })
+  
+  
+
   
   #####################################################################################################################
   # Einzelfragen Backend                                                                                   ############
