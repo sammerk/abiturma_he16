@@ -159,7 +159,7 @@ shinyUI(
                                            ".shiny-output-error:before { visibility: hidden; }"),
                                 fluidRow(
                                 column(12,
-                                       p(id = "loginwarning", div(HTML("<div style='display: block;' class='btn-err'>
+                                       p(div(HTML("<div id = 'loginwarning'; style='display: block;' class='btn-err'>
                                                           <div>
                                                             <i class='fa fa-exclamation-circle'></i>
                                                             <b>Error: </b>
