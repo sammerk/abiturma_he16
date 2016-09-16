@@ -148,7 +148,7 @@ loadData_q2 <- function() {
 
 # Function for Feedback recording of jitter navbarpage #####################################
 
-fields_fb_q1 <- c("qualdim1_fb_inf", "qualdim1_fb_finf", "qualdim1_fb_fazit")   # names of fields to track
+fields_fb_q1 <- c("qualdim1_fb_inf", "qualdim1_fb_sic")   # names of fields to track
 outputDir_fb_q1 <- "responses_fb_q1"
 
 saveData_fb_q1 <- function(data_fb_q1) {
@@ -166,7 +166,7 @@ saveData_fb_q1 <- function(data_fb_q1) {
 
 # Function for Feedback recording of likert navbarpage #####################################
 
-fields_fb_likert <- c("likert_fb_inf", "likert_fb_finf", "likert_fb_fazit")   # names of fields to track
+fields_fb_likert <- c("likert_fb_inf", "likert_fb_sic")   # names of fields to track
 outputDir_fb_likert <- "responses_fb_likert"
 
 saveData_fb_likert <- function(data_fb_likert) {
@@ -184,7 +184,7 @@ saveData_fb_likert <- function(data_fb_likert) {
 
 # Function for Feedback recording of jitter v2 navbarpage #####################################
 
-fields_fb_q2 <- c("qualdim2_fb_inf", "qualdim2_fb_finf", "qualdim2_fb_fazit")   # names of fields to track
+fields_fb_q2 <- c("qualdim2_fb_inf", "qualdim2_fb_sic")   # names of fields to track
 outputDir_fb_q2 <- "responses_fb_q2"
 
 saveData_fb_q2 <- function(data_fb_q2) {
@@ -202,7 +202,7 @@ saveData_fb_q2 <- function(data_fb_q2) {
 
 # Function for Feedback recording of logout navbarpage #####################################
 
-fields_fb_logout <- c("glob_fb_likert_inf", "glob_fb_q1_inf", "glob_fb_q2_inf", "glob_fb_frei_inf", "glob_fb_abiturma")   # names of fields to track
+fields_fb_logout <- c("glob_fb_likert_inf", "glob_fb_q1_inf", "glob_fb_q2_inf", "glob_fb_frei_inf", "glob_fb_erk", "glob_fb_abiturma")   # names of fields to track
 outputDir_fb_logout <- "responses_fb_logout"
 
 saveData_fb_logout <- function(data_fb_logout) {
@@ -217,7 +217,7 @@ saveData_fb_logout <- function(data_fb_logout) {
   )
 }
 
-# Function for Feedback recording of logout navbarpage #####################################
+# Function for Feedback recording of freitextpage #####################################
 
 fields_fb_frei <- c("frei_fb_inf", "frei_fb_finf", "frei_fb_fazit")   # names of fields to track
 outputDir_fb_frei <- "responses_fb_frei"
@@ -230,6 +230,26 @@ saveData_fb_frei <- function(data_fb_frei) {
   write.csv(
     x = data_fb_frei,
     file = file.path(outputDir_fb_frei, fileName_fb_frei), 
+    row.names = FALSE, quote = TRUE
+  )
+}
+
+
+# Function for recording of helpbutton-clicks #####################################
+
+fields_help <- c("darstellmodalbt", "jitterqualdimmodalbt", "scalemodalbt", "help_table_bt", "help_scale_bt", 
+                 "help_gmean", "help_q2_grandmean", "help_darst_st", "help_q2_groupmean", "help_restq2")
+
+outputDir_help <- "responses_help"
+
+saveData_help <- function(data_help) {
+  data_help <- t(data_help)
+  # Create a unique file name
+  fileName_help <- sprintf("%s_%s.csv", as.integer(Sys.time()), digest::digest(data_help))
+  # Write the file to the local system
+  write.csv(
+    x = data_help,
+    file = file.path(outputDir_help, fileName_help), 
     row.names = FALSE, quote = TRUE
   )
 }
@@ -802,6 +822,23 @@ shinyServer(function(input, output, session) {
   })
   
   
+  # Write help button usage ##################################
+  
+  # Whenever a field is filled, aggregate all form data
+  formData_help <- reactive({
+    data_help <- sapply(fields_help, function(x) input[[x]])
+    data_help$systtime <- paste(Sys.time())
+    data_help$user <- user()
+    data_help
+  })
+  
+  # When the Submit button is clicked, save the form data   ## 
+  # observeEvent(input$logout_btn, {                        ##  Code transfered to line ~ 855 where switchoff is iplemented 
+  #   saveData_help(formData_help())                        ##    
+  # })                                                      ##    
+  
+  
+  
   ## Feedback for logout page ######################################################################################
   
   # Write Feedback logout ##################################
@@ -817,16 +854,10 @@ shinyServer(function(input, output, session) {
   # When the Submit button is clicked, save the form data, terminate app and close window
 
      observeEvent(input$logout_btn, {
-    saveData_fb_logout(formData_fb_logout())
-     reset("glob_fb_likert_inf")
-     reset("glob_fb_q1_inf")
-     reset("glob_fb_frei_inf")
-     reset("glob_fb_q2_inf")
-     reset("glob_fb_abiturma")
-     reset("username")
-     reset("passw")
-    js$closeWindow()
-    stopApp()
+       saveData_help(formData_help())
+       saveData_fb_logout(formData_fb_logout())
+       js$closeWindow()
+       stopApp()
   })
   
   

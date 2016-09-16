@@ -156,19 +156,22 @@ shinyUI(
                                        h4("Bitte gib uns hin und wieder Feedback zu einem Plot!"),
                                        div(id = "form",
                                          selectInput("likert_fb_inf", div(HTML("<p>Den aktuell dargestellten Plot finde ich&nbsp;...</p>")),
-                                                     c("..." = NA,
+                                                     c("bitte auswählen..." = NA,
                                                        "1 = gar nicht informativ " = 1,
                                                        "2" = 2,
                                                        "3" = 3,
                                                        "4" = 4,
                                                        "5" = 5,
                                                        "6 = sehr informativ" = 6)),
-                                         textInput("likert_fb_finf", div(HTML("<p>Besonders informativ am aktuell dargestellten Plot finde ich&nbsp;...</p>")),
-                                                   value = "..."),
-                                         textInput("likert_fb_fazit", "Welche Erkenntnisse hast Du für Dich aus dem
-                                          aktuell dargestellten Plot gewinnen können?",
-                                                   value = "..."),
-                                         
+                                         selectInput("likert_fb_sic", div(HTML("<p>Bei der inhaltlichen Interpretation des aktuell dargestellten Plots bin 
+                                                                               ich&nbsp;...</p>")),
+                                                     c("bitte auswählen..." = NA,
+                                                       "1 = sehr unsicher " = 1,
+                                                       "2" = 2,
+                                                       "3" = 3,
+                                                       "4" = 4,
+                                                       "5" = 5,
+                                                       "6 = sehr sicher" = 6)),
                                          actionButton("likert_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
                                        )
                                      ))
@@ -258,19 +261,22 @@ shinyUI(
                                 div(
                                   id = "form",
                                 selectInput("qualdim1_fb_inf", div(HTML("<p>Den aktuell dargestellten Plot finde ich&nbsp;...</p>")),
-                                            c("..." = NA,
+                                            c("bitte auswählen..." = NA,
                                               "1 = gar nicht informativ " = 1,
                                               "2" = 2,
                                               "3" = 3,
                                               "4" = 4,
                                               "5" = 5,
                                               "6 = sehr informativ" = 6)),
-                                textInput("qualdim1_fb_finf", div(HTML("<p>Besonders informativ am aktuell dargestellten Plot finde ich&nbsp;...</p>")),
-                                          value = "..."),
-                                textInput("qualdim1_fb_fazit", "Welche Erkenntnisse hast Du für Dich aus dem
-                                          aktuell dargestellten Plot gewinnen können?",
-                                          value = "..."),
-                                
+                                selectInput("qualdim1_fb_sic", div(HTML("<p>Bei der inhaltlichen Interpretation des aktuell dargestellten Plots bin 
+                                                                               ich&nbsp;...</p>")),
+                                            c("bitte auswählen..." = NA,
+                                              "1 = sehr unsicher " = 1,
+                                              "2" = 2,
+                                              "3" = 3,
+                                              "4" = 4,
+                                              "5" = 5,
+                                              "6 = sehr sicher" = 6)),
                                 actionButton("qualdim1_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
                                 )
                                 )
@@ -288,7 +294,7 @@ shinyUI(
                         fluidRow(
                             column(2,
                               wellPanel(selectInput("qualdim2", label = h3("Ich möchte ..."), 
-                                         choices = c("bitte auswählen" = "noqualdim2",
+                                         choices = c("bitte auswählen..." = "noqualdim2",
                                                      sample(c("einen Überblick bekommen" = "ueber",
                                                               "etwas über meine Stärken und Schwächen erfahren" = "staerken",
                                                               "meine Kurse untereinander vergleichen" = "kurse",
@@ -344,19 +350,28 @@ shinyUI(
                                      div(
                                        id = "form",
                                        selectInput("qualdim2_fb_inf", div(HTML("<p>Den aktuell dargestellten Plot finde ich&nbsp;...</p>")),
-                                                   c("..." = NA,
+                                                   c("bitte auswählen ..." = NA,
                                                      "1 = gar nicht informativ " = 1,
                                                      "2" = 2,
                                                      "3" = 3,
                                                      "4" = 4,
                                                      "5" = 5,
                                                      "6 = sehr informativ" = 6)),
-                                       textInput("qualdim2_fb_finf", div(HTML("<p>Besonders informativ am aktuell dargestellten Plot finde ich&nbsp;...</p>")),
-                                                 value = "..."),
-                                       textInput("qualdim2_fb_fazit", "Welche Erkenntnisse hast Du für Dich aus dem
-                                                 aktuell dargestellten Plot gewinnen können?",
-                                                 value = "..."),
-                                       
+                                      # textInput("qualdim2_fb_finf", div(HTML("<p>Besonders informativ am aktuell dargestellten Plot finde ich&nbsp;...</p>")),#
+                                      #           value = "..."),
+                                      # textInput("qualdim2_fb_fazit", "Welche Erkenntnisse hast Du für Dich aus dem
+                                      #           aktuell dargestellten Plot gewinnen können?",
+                                      #           value = "..."),
+                                      # 
+                                      selectInput("qualdim2_fb_sic", div(HTML("<p>Bei der inhaltlichen Interpretation des aktuell dargestellten Plots bin 
+                                                                               ich&nbsp;...</p>")),
+                                                  c("bitte auswählen..." = NA,
+                                                    "1 = sehr unsicher " = 1,
+                                                    "2" = 2,
+                                                    "3" = 3,
+                                                    "4" = 4,
+                                                    "5" = 5,
+                                                    "6 = sehr sicher" = 6)),
                                        actionButton("qualdim2_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
                                      )
                                    )
@@ -411,18 +426,13 @@ tabPanel(title = "Freitext-Antworten", value = "freitext_antw",
                     div(
                       id = "form",
                       selectInput("frei_fb_inf", div(HTML("<p>Die Freitexte finde ich&nbsp;...</p>")),
-                                  c("..." = NA,
+                                  c("bitte auswählen..." = NA,
                                     "1 = gar nicht informativ " = 1,
                                     "2" = 2,
                                     "3" = 3,
                                     "4" = 4,
                                     "5" = 5,
                                     "6 = sehr informativ" = 6)),
-                      textInput("frei_fb_finf", div(HTML("<p>Besonders informativ an den Freitexten finde ich&nbsp;...</p>")),
-                                value = "..."),
-                      textInput("frei_fb_fazit", "Welche Erkenntnisse hast Du für Dich aus deinen
-                                Freitexten gewinnen können?",
-                                value = "..."),
                       actionButton("frei_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
                   )) 
            )
@@ -478,18 +488,27 @@ tabPanel(title = "Logout", value = "logout",
                                      "4" = 4,
                                      "5" = 5,
                                      "6 = sehr informativ" = 6), width = "80%")
+                       )),
+                       
+                       fluidRow(column(12,
+                      h5("Welche Erkenntnisse hast Du für Dich aus den eben gesichteten Rückmeldungen der Kursteilnehmer/innen 
+                         gewinnen können?"),
+                      tags$br(),
+                      tags$textarea(id="glob_fb_erk", rows=3, cols=60,"..."),
+                      tags$br())),
 
-                     )),
+                     fluidRow(column(12),
+                              column(12,
                      h3("Dein Feedback zu abiturma"),
                      h5("Hier hast Du Platz für jede Art von Rückmeldungen. (Beispielsweise hinsichtlich unserer Kommunikation 
                         mit Dir, den Kursunterlagen, der Organisation vor Ort, Deinen Erfahrungen beim Unterrichten etc.)"),
                      tags$br(),
-                     tags$textarea(id="glob_fb_abiturma", rows=5, cols=120, "..."),
+                     tags$textarea(id="glob_fb_abiturma", rows=5, cols=60, "..."),
                      tags$br(),
                      hr(),
                      actionButton("logout_btn", "Feedback abschicken & Logout", icon = icon("off", lib = "glyphicon"))
-             )
-           )
+             ))
+           ))
          ))
 
 

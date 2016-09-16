@@ -1,6 +1,8 @@
-# Herzlichen willkommen!
-Sie befinden sich auf der Demonstrationseite des Forschungsprojektes "Rezeption formativer Unterrichtsqualitätdiagnostik" der Abteilung Schulpädagogik an der Universität Tübingen. Sie können sich hier einen Eindruck der Funktionalitäten verschaffen. 
+# Hallo!
+Text text.  
+  
+  
+  
+__Bei Fragen ...__  
 
-__Bei Fragen zum Projekt ...__  
-
-...können Sie gerne unter samuel.merk@uni-tuebingen.de Kontakt aufnehmen.
+...können Sie/kannst du gerne unter samuel.merk@uni-tuebingen.de Kontakt aufnehmen.
