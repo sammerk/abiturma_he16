@@ -95,6 +95,8 @@ data_pw_bestehend <- read.table("data/data_kl/data_pw.csv", sep = ";", header = 
 data_pw_bestehend$Datum <- as.Date(data_pw_bestehend$Datum)
 
 # Filterung des Inkrements (= "neue" KL) und PW-Genese
+library(random)
+library(lubridate)
 data_pw_inkrement <- rawdata_inkrement%>%
   select(Personalnummer, Kursdatum)%>%
   unique()%>%
@@ -118,7 +120,13 @@ data_pw_inkrement <- data_pw_inkrement%>%
 
 
 # Join Inkrement und Bestehend
-data_pw_inkrementiert <- full_join(data_pw_bestehend, data_pw_inkrement)
-
+data_pw_inkrementiert <- full_join(data_pw_bestehend, data_pw_inkrement)%>%
+  select(Datum, Personalnummer, Passwort)
   
 
+#######        Danger Zone         #########################################################################################################################
+#######                                                                                                                                                    #
+####### write.table(data_pw_inkrementiert, file = paste("data/data_kl/data_pw_inkrementiert", as.character(Sys.time()), ".csv", sep = ""),                 #
+#######                                    sep = ";", row.names = F, quote = F)                                                                            #
+####### write.table(data_pw_inkrementiert, file = ## "data/data_kl/data_pw_inkrementiert.csv", sep = ";", row.names = F, quote = F)                        #
+############################################################################################################################################################

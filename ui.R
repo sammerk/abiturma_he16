@@ -156,12 +156,13 @@ shinyUI(
                                        
                                        h4("Bitte gib uns hin und wieder Feedback zu einem Plot!"),
                                        h5(""),
-                                       tags$div(HTML('<div id="stars" class="form-group shiny-input-radiogroup shiny-input-container">
+                                       div(id = "likertform",
+                                       tags$div(HTML('<div id="likertstars1" class="form-group shiny-input-radiogroup shiny-input-container">
   <label class="control-label" for="dist">Informativität des aktuell dargestellten Plot: </label>
                                                      <div class="shiny-options-group">
                                                      <div class="radio">
                                                      <label>
-                                                     <input type="radio" name="dist" value="norm"/>
+                                                     <input type="radio" name="dist" value="norm" checked="checked"/>
                                                      <span><i class="fa fa-star" aria-hidden="true"></i>
 </span>
                                                      </label>
@@ -186,7 +187,6 @@ shinyUI(
                                                      </div>
                                                      </div>
                                                      </div>')),
-                                       div(id = "form",
                                          selectInput("likert_fb_inf", div(HTML("<p>Den aktuell dargestellten Plot finde ich&nbsp;...</p>")),
                                                      c("bitte auswählen..." = NA,
                                                        "1 = gar nicht informativ " = 1,

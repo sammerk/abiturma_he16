@@ -164,7 +164,7 @@ saveData_fb_q1 <- function(data_fb_q1) {
 
 # Function for Feedback recording of likert navbarpage #####################################
 
-fields_fb_likert <- c("likert_fb_inf", "likert_fb_sic", "stars")   # names of fields to track
+fields_fb_likert <- c("likert_fb_inf", "likert_fb_sic", "likertstars1")   # names of fields to track
 outputDir_fb_likert <- "responses_fb_likert"
 
 saveData_fb_likert <- function(data_fb_likert) {
@@ -725,8 +725,8 @@ shinyServer(function(input, output, session) {
   # Reset likert form ###########################################
   observeEvent(input$likert_fb_btn, {
 
-    reset("likert_fb_inf")
-    reset("likert_fb_sic")
+    reset("likertform")
+    reset("likertstars1")
   })
   
   # Write Feedback likert ##################################
