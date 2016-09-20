@@ -1,15 +1,14 @@
 library(shiny)
 library(shinyBS)
 library(shinyjs)
-library(svgPanZoom)
-library(gridSVG)
 source("helpers.R")
 
 
 #####################################################################################
-# js code for:                                                           ############
-#     -enter key = simulation of button press                            
-#     -action button = close app                                         
+# js code for:                                                                      #
+#     -enter key = simulation of button press                                       #                         
+#     -action button = close app                                                    #
+#     -reset of stratingInput                                                       #
 #####################################################################################
 
 jscode <- '
@@ -28,9 +27,11 @@ $proxy.click();
 }
 );
 });
+
 shinyjs.closeWindow = function() { window.close(); }
 '
 
+#jsCodeR <-"shinyjs.reset_1 = function(params){$('.rating-symbol-foreground').css('width', params);}"
 #####################################################################################
 # CSS adaption for plot-spinner                                          ############
 #####################################################################################
@@ -154,6 +155,37 @@ shinyUI(
                                      wellPanel(
                                        
                                        h4("Bitte gib uns hin und wieder Feedback zu einem Plot!"),
+                                       h5(""),
+                                       tags$div(HTML('<div id="stars" class="form-group shiny-input-radiogroup shiny-input-container">
+  <label class="control-label" for="dist">Informativität des aktuell dargestellten Plot: </label>
+                                                     <div class="shiny-options-group">
+                                                     <div class="radio">
+                                                     <label>
+                                                     <input type="radio" name="dist" value="norm"/>
+                                                     <span><i class="fa fa-star" aria-hidden="true"></i>
+</span>
+                                                     </label>
+                                                     </div>
+                                                     <div class="radio">
+                                                     <label>
+                                                     <input type="radio" name="dist" value="unif"/>
+                                                     <span><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></span>
+                                                     </label>
+                                                     </div>
+                                                     <div class="radio">
+                                                     <label>
+                                                     <input type="radio" name="dist" value="lnorm"/>
+                                                     <span><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></span>
+                                                     </label>
+                                                     </div>
+                                                     <div class="radio">
+                                                     <label>
+                                                     <input type="radio" name="dist" value="exp"/>
+                                                     <span><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></span>
+                                                     </label>
+                                                     </div>
+                                                     </div>
+                                                     </div>')),
                                        div(id = "form",
                                          selectInput("likert_fb_inf", div(HTML("<p>Den aktuell dargestellten Plot finde ich&nbsp;...</p>")),
                                                      c("bitte auswählen..." = NA,

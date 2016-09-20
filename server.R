@@ -4,8 +4,6 @@ library(tidyr)
 library(shiny)
 library(shinyBS)
 library(feather)
-library(svgPanZoom)
-library(gridSVG)
 library(scrypt)
 
 
@@ -166,7 +164,7 @@ saveData_fb_q1 <- function(data_fb_q1) {
 
 # Function for Feedback recording of likert navbarpage #####################################
 
-fields_fb_likert <- c("likert_fb_inf", "likert_fb_sic")   # names of fields to track
+fields_fb_likert <- c("likert_fb_inf", "likert_fb_sic", "stars")   # names of fields to track
 outputDir_fb_likert <- "responses_fb_likert"
 
 saveData_fb_likert <- function(data_fb_likert) {
@@ -726,9 +724,9 @@ shinyServer(function(input, output, session) {
   
   # Reset likert form ###########################################
   observeEvent(input$likert_fb_btn, {
+
     reset("likert_fb_inf")
-    reset("likert_fb_finf")
-    reset("likert_fb_fazit")
+    reset("likert_fb_sic")
   })
   
   # Write Feedback likert ##################################
@@ -752,8 +750,7 @@ shinyServer(function(input, output, session) {
   # Reset q1 ###########################################
   observeEvent(input$qualdim1_fb_btn, {
     reset("qualdim1_fb_inf")
-    reset("qualdim1_fb_finf")
-    reset("qualdim1_fb_fazit")
+    reset("qualdim1_fb_sic")
   })
   
   # Write Feedback q1 ##################################
@@ -777,8 +774,7 @@ shinyServer(function(input, output, session) {
   # Reset q2 ###########################################
   observeEvent(input$qualdim2_fb_btn, {
     reset("qualdim2_fb_inf")
-    reset("qualdim2_fb_finf")
-    reset("qualdim2_fb_fazit")
+    reset("qualdim2_fb_sic")
   })
   
   # Write Feedback q2 ##################################
@@ -802,8 +798,7 @@ shinyServer(function(input, output, session) {
   # Reset q2 ###########################################
   observeEvent(input$frei_fb_btn, {
     reset("frei_fb_inf")
-    reset("frei_fb_finf")
-    reset("frei_fb_fazit")
+    reset("frei_fb_sic")
   })
   
   # Write Feedback frei ##################################
