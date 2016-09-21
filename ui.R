@@ -92,7 +92,7 @@ shinyUI(
   useShinyjs(),
   navbarPage("Unterrichtsfeedback", id = "navbarpage", theme = "lumen.css", #$$
                    
-###########################################################################
+############################################################################
 # Vorwort                                                            ######
 ###########################################################################
                    tabPanel("Vorwort", 
@@ -477,7 +477,7 @@ tabPanel(title = "Freitext-Antworten", value = "freitext_antw",
 # Log-out Site                                                       ######
 ###########################################################################
 
-tabPanel(title = "Logout", value = "logout",
+tabPanel(title = "Deine Rückmeldung & Logout", value = "logout",
          
            fluidRow(
              column(8, offset = 2,

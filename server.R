@@ -9,18 +9,19 @@ library(scrypt)
 
 
 
-# Ip-Test ################################################################################
+# Ip-Test ##################################################################################
 Sys.setenv(TZ='GMT+4')
 ipID <- renderPrint(print(input$ipid))
 
-# Data Import ############################################################################
+# Data Import ##############################################################################
 
-kursdata <- read.table("data/kursdata_fr16_b_demo.csv", sep = ";", header = TRUE, na.strings = c("NA"))       # Import of Data
+kursdata2 <- read.table("data/kursdata_fr16_b_demo.csv", sep = ";", header = TRUE, na.strings = c("NA"))       # Import of Data
+kursdata <- data.table::fread("data/data_dynamic/kursdata_inkrementiert.csv", sep = ";", header = TRUE, na.strings = c("NA")) 
 #likertdata1 <- read.table("data/likertdata_fr16_2.csv", sep = ";", header = T, na.strings = c("NA"))
 freitextdata <- read.table("data/freitextdata_fr16_demo.csv", sep = ";", header = T, na.strings = c("NA"))
 likertdata1 <- read.table("data/likertdata_fr16_2_demo.csv", sep = ";", header = T, na.strings = c("NA"))
-pw_data <- read_feather("Stuff/kl_pw.feather")
-
+#pw_data2 <- read_feather("Stuff/kl_pw.feather")
+pw_data <- tbl_df(data.table::fread("data/data_kl/data_pw_scrypted.csv", sep = ";", na.strings = "NA"))
 
 ##########################################################################################
 # Custom Functions ###
@@ -297,8 +298,9 @@ shinyServer(function(input, output, session) {
   # reactive value of valid login
   
   login_true <- reactive({verifyPassword(as.character(pw_data[pw_data$Login == user(),"Passwort_scrypted"]), 
-                               as.character(input$passw)) == TRUE
-    })  
+                                         as.character(input$passw)) == TRUE
+  })
+  
   
   observeEvent(input$loginBtn, {
     # When the button is clicked, wrap the code in a call to `withBusyIndicatorServer()`
@@ -465,7 +467,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  #####################################################################################################################
+  ######################################################################################################################
   # Qualitätsdimensionen Backend                                                                           ############
   #####################################################################################################################
   

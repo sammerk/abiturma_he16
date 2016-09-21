@@ -29,6 +29,9 @@ rawdata_inkrement$Kursdatum <- lubridate::dmy(rawdata_inkrement$Kursstart)
 ##Vorbereitung Uhrzeit
 rawdata_fr16$Uhrzeit <- rawdata_fr16$Kurszeit
 
+##Vorbereitung Username
+rawdata_fr16$Username <- "abiturma_vor_he16"
+
 ## Vorbereitung Kursort
 rawdata_inkrement$Kursort <- gsub(" \\(.*", "", rawdata_inkrement$Kursbezeichnung)
 rawdata_fr16$Kursort <- rawdata_fr16$Veranstaltungsort
@@ -45,11 +48,16 @@ rawdata <- dplyr::full_join(rawdata_inkrement, rawdata_fr16)
 
 ## Kursdata_ink erstellen
 # Factor scores bilden
+scale_this <- function(x){
+  (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)
+}
+
 library(tidyr)
 kursdata_ink <- rawdata%>%
   select(starts_with("le"), starts_with("en"), starts_with("or"), starts_with("ci"), starts_with("ir"),
-         Kursort, Kursbeginn, Uhrzeit, Username, Klassen.Id)%>%
+         Kursort, Kursdatum, Uhrzeit, Username, Klassen.Id)%>%
   mutate(kursleiterin             = Username,
+         Kursbeginn               = Kursdatum,
          kurs                     = Klassen.Id,
          fortlID                  = 1:n(),
          Lernerfolg               = rowMeans(data.frame(le1,le2,le3,le4), na.rm = T),
@@ -60,11 +68,13 @@ kursdata_ink <- rawdata%>%
   select(-num_range("le", 1:4), -num_range("en", 1:4), -num_range("ci", 1:4), -num_range("ir", 1:3), -num_range("or", 1:5))%>%  
   gather(variable, value, Lernerfolg, Enthusiasmus, Gruppeninteraktion, `Individuelle Beziehung`, Organisation)%>%
   group_by(variable)%>%
-  mutate(value.std = scale(value))%>%
+  mutate(value.std = scale_this(value))%>%
   ungroup()%>%
   group_by(fortlID)%>%
-  mutate(value.pstd = scale(value))%>%
-  ungroup()
+  mutate(value.pstd = scale_this(value))%>%
+  ungroup()%>%
+  filter(is.na(Username)==F)
+
 
 # Interne Validierungen:  
 summary(kursdata_ink)
@@ -80,9 +90,10 @@ kursdata_ink%>%
 levels(as.factor(kursdata_ink$variable))
 
 
-#### Änderungen für server.R
-# value_std.V1        value_pstd.V1 !!!! Werden nur im Summary angezeigt?
-
+######## Writing Zone   ##################################################################################################
+### Schreiben kursdata_ink
+# write.table(kursdata_ink, file = "data/data_dynamic/kursdata_inkrementiert.csv", sep = ";", row.names = F, quote = F) 
+##########################################################################################################################
 
 
 
@@ -124,9 +135,30 @@ data_pw_inkrementiert <- full_join(data_pw_bestehend, data_pw_inkrement)%>%
   select(Datum, Personalnummer, Passwort)
   
 
-#######        Danger Zone         #########################################################################################################################
-#######                                                                                                                                                    #
-####### write.table(data_pw_inkrementiert, file = paste("data/data_kl/data_pw_inkrementiert", as.character(Sys.time()), ".csv", sep = ""),                 #
-#######                                    sep = ";", row.names = F, quote = F)                                                                            #
-####### write.table(data_pw_inkrementiert, file = ## "data/data_kl/data_pw_inkrementiert.csv", sep = ";", row.names = F, quote = F)                        #
+# Passwörter verschlüsseln und encrypt datei erstellen
+pw_scrypted_inkrementiert <- left_join(unique(select(data_pw_inkrementiert, Personalnummer, Passwort)),
+                                      unique(select(kn_kl_key, Personalnummer, Username)))
+
+for (i in 1:nrow(pw_scrypted_inkrementiert)){
+pw_scrypted_inkrementiert$Passwort_scrypted[i] <-  scrypt::hashPassword(pw_scrypted_inkrementiert$Passwort[i])
+}
+
+pw_scrypted_inkrementiert <- pw_scrypted_inkrementiert%>%
+  mutate(Login = Username)%>%
+  select(Login, Passwort_scrypted)
+
+#############  Danger Zone  ################################################################################################################################
+#######                                                                                                                                                  
+####### write.table(data_pw_inkrementiert, file = paste("data/data_kl/data_pw_inkrementiert", as.character(Sys.time()), ".csv", sep = ""),               
+#######                                    sep = ";", row.names = F, quote = F)                                                                          
+####### write.table(data_pw_inkrementiert, file = ## "data/data_kl/data_pw_inkrementiert.csv", sep = ";", row.names = F, quote = F)                      
+#######                                                                                                                                                  
+#######                                                   
+#######                                                                                                                                                  
+####### write.table(pw_scrypted_inkrementiert, file = paste("data/data_kl/data_pw_scrypted", as.character(Sys.time()), ".csv", sep = ""),                
+#######                                    sep = ";", row.names = F, quote = F)                                                         
+#######                     
+####### write.table(pw_scrypted_inkrementiert, file = "data/data_kl/data_pw_scrypted.csv", sep = ";", row.names = F, quote = F)  
 ############################################################################################################################################################
+
+test <- data.table::fread("data/data_kl/data_pw_scrypted2016-09-21 05:27:36.csv", sep = ";", na.strings = "NA")
