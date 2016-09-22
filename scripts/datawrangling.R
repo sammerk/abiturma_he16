@@ -13,13 +13,13 @@ kn_kl_key <-read.csv(url('https://samuel.merk%40uni-tuebingen.de:afbogena@www.ab
 rawdata_fr16 <- data.table::fread("data/data_raw/rawdata_fr16_utf8.csv", sep = ";", na.strings = "NA")
 
 ## Import Inkrement
-rawdata_inkrement <- data.table::fread("rawdata_charge5/daten.csv", sep = ";")
+rawdata_inkrement_raw <- data.table::fread("rawdata_charge5/daten.csv", sep = ";")
 
 ## Match Inkrement + kn_kn_key 
-rawdata_inkrement$Klassen.Id <- rawdata_inkrement$ID
-rawdata_inkrement$em2 <- NULL ## zu ändern im Questor-Codeplan
-rawdata_inkrement$em2 <- NULL ## zu ändern im Questor-Codeplan
-rawdata_inkrement <- dplyr::left_join(rawdata_inkrement, kn_kl_key, by = "Klassen.Id")
+rawdata_inkrement_raw$Klassen.Id <- rawdata_inkrement$ID
+rawdata_inkrement_raw$em2 <- NULL ## zu ändern im Questor-Codeplan
+rawdata_inkrement_raw$em2 <- NULL ## zu ändern im Questor-Codeplan
+rawdata_inkrement <- dplyr::left_join(rawdata_inkrement_raw, kn_kl_key, by = "Klassen.Id")
 
 
 ## Vorbereitung Kursdatum
@@ -94,6 +94,27 @@ levels(as.factor(kursdata_ink$variable))
 ### Schreiben kursdata_ink
 # write.table(kursdata_ink, file = "data/data_dynamic/kursdata_inkrementiert.csv", sep = ";", row.names = F, quote = F) 
 ##########################################################################################################################
+
+
+
+######## Dynamisch inkrementelles Freitext data generieren ###############################################################
+freitextdata_ink <- tbl_df(full_join(rawdata_inkrement_raw,                     ## Hier wird es nur _inks geben, da 
+                                     kn_kl_key, by = "Klassen.Id"))%>%          ## Freitexte von vor Herbst '16 nicht angezeigt 
+                    mutate(kursleiterin = as.factor(Username),                             ## werden.
+                           score = rowMeans(data.frame(le1,le2,le3,le4,
+                                                       en1,en2,en3,en4,
+                                                       ci1,ci2,ci3,ci4,
+                                                       ir1,ir2,ir3,
+                                                       or1,or2,or3,or4,or5), na.rm = T),
+                           ftk = as.factor(paste("rawdata_charge5/freitextbilder/", ftk, sep = "")))%>%                    
+                    select(ftk, kursleiterin, score)
+                    
+######## Writing Zone   ##################################################################################################
+#   Schreiben freitextdata_ink
+#   write.table(freitextdata_ink, file = "data/data_dynamic/freitextdata_inkrementiert.csv", sep = ";", row.names = F, quote = F) 
+##########################################################################################################################
+
+
 
 
 

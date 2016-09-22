@@ -15,10 +15,11 @@ ipID <- renderPrint(print(input$ipid))
 
 # Data Import ##############################################################################
 
-kursdata2 <- read.table("data/kursdata_fr16_b_demo.csv", sep = ";", header = TRUE, na.strings = c("NA"))       # Import of Data
+#kursdata <- read.table("data/kursdata_fr16_b_demo.csv", sep = ";", header = TRUE, na.strings = c("NA"))       # Import of Data
 kursdata <- data.table::fread("data/data_dynamic/kursdata_inkrementiert.csv", sep = ";", header = TRUE, na.strings = c("NA")) 
 #likertdata1 <- read.table("data/likertdata_fr16_2.csv", sep = ";", header = T, na.strings = c("NA"))
-freitextdata <- read.table("data/freitextdata_fr16_demo.csv", sep = ";", header = T, na.strings = c("NA"))
+#freitextdata <- read.table("data/freitextdata_fr16_demo.csv", sep = ";", header = T, na.strings = c("NA"))
+freitextdata <- data.table::fread("data/data_dynamic/freitextdata_inkrementiert.csv", sep = ";", header = TRUE, na.strings = c("NA"), stringsAsFactors = T) 
 likertdata1 <- read.table("data/likertdata_fr16_2_demo.csv", sep = ";", header = T, na.strings = c("NA"))
 #pw_data2 <- read_feather("Stuff/kl_pw.feather")
 pw_data <- tbl_df(data.table::fread("data/data_kl/data_pw_scrypted.csv", sep = ";", na.strings = "NA"))
@@ -369,7 +370,9 @@ shinyServer(function(input, output, session) {
       if(input$sort_freitexte == "abst"){
         freitextdata1 <-
           freitextdata%>%
-          filter(kursleiterin == user())%>%
+          filter(kursleiterin == user(),
+                 ftk != "data/freitextbilder_questor4/",
+                 ftk != "rawdata_charge5/freitextbilder/")%>%
           arrange(desc(score))
       }
       
@@ -377,7 +380,9 @@ shinyServer(function(input, output, session) {
       if(input$sort_freitexte == "nsort" | is.null(input$sort_freitexte) == TRUE){
         freitextdata1 <-
           freitextdata%>%
-          filter(kursleiterin == user())
+          filter(kursleiterin == user(),
+                 ftk != "data/freitextbilder_questor4/",
+                 ftk != "rawdata_charge5/freitextbilder/")
       }
       
       
@@ -387,16 +392,19 @@ shinyServer(function(input, output, session) {
     })
   
   ## Debug DF
-  #output$freitextdata_debug <-  DT::renderDataTable({freitextdata2()})
-  
-  freitextdata3 <- 
-    reactive({ 
-      freitextdata1 <-
-        freitextdata%>%
-        filter(kursleiterin == user(),
-               ftk != "data/freitextbilder_questor4/")
+  output$freitextdata_debug1 <-  renderPrint({
+
+    as.character(freitextdata2()$ftk[5])
+
     })
-  
+  output$freitextdata_debug2 <-  renderPrint({
+
+    class(freitextdata2()$ftk)
+  })
+  output$freitextdata_debug3 <-  renderPrint({
+    head(freitextdata2())
+
+  })
   
   ## 
   max_freitextplots <- 70
@@ -410,7 +418,7 @@ shinyServer(function(input, output, session) {
 
     plot_output_list <- lapply(1:length((freitextdata2()$ftk)), function(i) {
       plotname <- paste("freitextplot", i, sep="")
-      plotOutput(plotname, height = 100)
+      plotOutput(plotname, height = "165px")
     })
     
     # Convert the list to a tagList - this is necessary for the list of items
@@ -434,7 +442,8 @@ shinyServer(function(input, output, session) {
       output[[plotname]] <- renderImage({
         path1 <- as.character(freitextdata2()$ftk[my_i])
         list(src = path1,
-             alt = paste("")
+             alt = paste("alt text"),
+             width = "100%"
         )
         
       })

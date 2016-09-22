@@ -446,11 +446,10 @@ tabPanel(title = "Freitext-Antworten", value = "freitext_antw",
                     Hast du die Option \"absteigende Gesamtbewertung\" ausgewählt, werden die Freitexte nach den 
                     Bewertungen in den Qualitätsdimensionen sortiert: Oben stehen die Freitexte von TeilnehmerInnen die dich 
                     am besten bewertet haben."),
-                  hidden(
-                  div(id = "freitext-container",
-                      tags$img(src = "spinner.gif",
-                               id = "loading-spinner"),
-                  uiOutput("freitextplots")))
+                  uiOutput("freitextplots"),
+                  verbatimTextOutput("freitextdata_debug1"),
+                  verbatimTextOutput("freitextdata_debug2"),
+                  verbatimTextOutput("freitextdata_debug3")
                   ),
             column(2,
                   wellPanel(
