@@ -183,7 +183,8 @@ shinyUI(
                                        edit_rbutton(radioButtons("likert_sic_stars",
                                                                  div(HTML("Meine <b>Interpretationssicherheit</b> bzgl. des 
                                                                                              aktuellen Plots")),
-                                                                 choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4)))
+                                                                 choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4))),
+                                       actionButton("likert_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
                                      ))
                                      ))
                    )),
@@ -193,7 +194,7 @@ shinyUI(
 ###########################################################################
                    tabPanel(title = "Qualitätsdimensionen_v1", value = "qualdim_v1",
                             fluidRow(
-                              column(width = 2,
+                              column(width = 3,
                               wellPanel(
                                 checkboxGroupInput("qualdim", span(tags$strong("Qualitätsdimensionen")," (min. eine ausw.)",
                                                                    bsButton("jitterqualdimmodalbt", "?", 
@@ -232,7 +233,7 @@ shinyUI(
                                 actionButton("goqualdim", "Plot!", icon = icon("bar-chart-o", lib = "font-awesome"))
                                 
                               )),
-                             column(width = 8,
+                             column(width = 7,
                                 p(div(HTML("<div id = 'loginwarning2'; style='display: block;' class='btn-err'>
                                                     <div>
                                            <i class='fa fa-exclamation-circle'></i>
@@ -344,37 +345,23 @@ shinyUI(
                                       includeHTML("Stuff/Helpstuff/help_table6.html")))
                              ),
                             column(2,
-                                   wellPanel(
-                                     h4("Bitte gib uns hin und wieder Feedback zu einem Plot!"),
+                                   hidden(
                                      div(
-                                       id = "form",
-                                       selectInput("qualdim2_fb_inf", div(HTML("<p>Den aktuell dargestellten Plot finde ich&nbsp;...</p>")),
-                                                   c("bitte auswählen ..." = NA,
-                                                     "1 = gar nicht informativ " = 1,
-                                                     "2" = 2,
-                                                     "3" = 3,
-                                                     "4" = 4,
-                                                     "5" = 5,
-                                                     "6 = sehr informativ" = 6)),
-                                      # textInput("qualdim2_fb_finf", div(HTML("<p>Besonders informativ am aktuell dargestellten Plot finde ich&nbsp;...</p>")),#
-                                      #           value = "..."),
-                                      # textInput("qualdim2_fb_fazit", "Welche Erkenntnisse hast Du für Dich aus dem
-                                      #           aktuell dargestellten Plot gewinnen können?",
-                                      #           value = "..."),
-                                      # 
-                                      selectInput("qualdim2_fb_sic", div(HTML("<p>Bei der inhaltlichen Interpretation des aktuell dargestellten Plots bin 
-                                                                               ich&nbsp;...</p>")),
-                                                  c("bitte auswählen..." = NA,
-                                                    "1 = sehr unsicher " = 1,
-                                                    "2" = 2,
-                                                    "3" = 3,
-                                                    "4" = 4,
-                                                    "5" = 5,
-                                                    "6 = sehr sicher" = 6)),
-                                       actionButton("qualdim2_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
+                                       id = "q2_form",
+                                   wellPanel(
+                                     h4("Bitte bewerte einige Plots!"),
+
+                                       edit_rbutton(radioButtons("q2_inf_stars",
+                                                                 div(HTML("<b>Informationsgehalt</b> des aktuellen Plots")),
+                                                                 choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4))),
+                                       edit_rbutton(radioButtons("q2_sic_stars",
+                                                                 div(HTML("Meine <b>Interpretationssicherheit</b> bzgl. des 
+                                                                          aktuellen Plots")),
+                                                                 choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4))),
+                                       actionButton("qualdim2_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))))
                                      )
                                    )
-                                  ) 
+                                  
                             )
                         ),
 
@@ -415,20 +402,17 @@ tabPanel(title = "Freitext-Antworten", value = "freitext_antw",
                     am besten bewertet haben."),
                   uiOutput("freitextplots")),
             column(2,
-                  wellPanel(
-                    h4("Bitte gib uns Feedback zu deiner Wahrnehmung der Freitexte!"),
-                    div(
-                      id = "form",
-                      selectInput("frei_fb_inf", div(HTML("<p>Die Freitexte finde ich&nbsp;...</p>")),
-                                  c("bitte auswählen..." = NA,
-                                    "1 = gar nicht informativ " = 1,
-                                    "2" = 2,
-                                    "3" = 3,
-                                    "4" = 4,
-                                    "5" = 5,
-                                    "6 = sehr informativ" = 6)),
+                   hidden(
+                   div(
+                      id = "frei_form",
+                      wellPanel(
+                      h4("Bitte bewerten!"),
+                      
+                      edit_rbutton(radioButtons("frei_inf_stars",
+                                                div(HTML("<b>Informationsgehalt</b> der Freitexte")),
+                                                choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4))),
                       actionButton("frei_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
-                  )) 
+                  ))) 
            )
               
            )),
@@ -459,12 +443,12 @@ tabPanel(title = "Deine Rückmeldung & Logout", value = "logout",
                        hr(),
                        h5("Welche Erkenntnisse hast Du für Dich aus den eben gesichteten Rückmeldungen der Kursteilnehmer/innen 
                          gewinnen können?"),
-                       tags$textarea(id="glob_fb_erk", rows=3, cols=60,"..."),
+                       tags$textarea(id="glob_fb_erk", rows=3, cols=90,"..."),
                        hr(),
                        h4("Dein Feedback zu abiturma"),
                        h5("Hier hast Du Platz für jede Art von Rückmeldungen. (Beispielsweise hinsichtlich unserer Kommunikation 
                         mit Dir, den Kursunterlagen, der Organisation vor Ort, Deinen Erfahrungen beim Unterrichten etc.)"),
-                                tags$textarea(id="glob_fb_abiturma", rows=5, cols=60, "..."),
+                                tags$textarea(id="glob_fb_abiturma", rows=5, cols=90, "..."),
                                 tags$br(),
                        tags$br(),
                        

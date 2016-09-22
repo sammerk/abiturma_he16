@@ -28,7 +28,7 @@ rawdata_inkrement <- dplyr::left_join(rawdata_inkrement_raw, kn_kl_key, by = "Kl
 
 ## Vorbereitung Kursdatum
 rawdata_fr16$Kursdatum <- lubridate::dmy(rawdata_fr16$Kursbeginn)
-
+rawdata_inkrement$Kursdatum <- rawdata_inkrement$Kursstart
 ##Vorbereitung Uhrzeit
 rawdata_fr16$Uhrzeit <- rawdata_fr16$Kurszeit
 
@@ -239,5 +239,3 @@ pw_scrypted_inkrementiert <- pw_scrypted_inkrementiert%>%
 #######                     
 ####### write.table(pw_scrypted_inkrementiert, file = "data/data_kl/data_pw_scrypted.csv", sep = ";", row.names = F, quote = F)  
 ############################################################################################################################################################
-
-test <- data.table::fread("data/data_kl/data_pw_scrypted2016-09-21 05:27:36.csv", sep = ";", na.strings = "NA")

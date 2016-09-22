@@ -43,7 +43,7 @@ stat_sum_single <- function(fun, geom="point", ...) {
 
 # Functions for usage tracking of jitter Navbarpage #######################################
 
-fields <- c("qualdim", "darstell", "scaling", "groupin", "ipid")   # names of fields to track
+fields <- c("qualdim", "darstell", "scaling", "groupin", "ipid", "q1_inf_stars", "q1_sic_stars")   # names of fields to track
 
 outputDir <- "responses_jitter"
 
@@ -98,7 +98,7 @@ loadData_l <- function() {
 
 # Functions for usage tracking of freitext Navbarpage ####################################
 
-fields_f <- c("sort_freitexte", "ipid")   # names of fields to track
+fields_f <- c("sort_freitexte", "ipid", "frei_inf_stars")   # names of fields to track
 outputDir_f <- "responses_freitext"
 
 saveData_f <- function(data_f) {
@@ -125,7 +125,7 @@ loadData_f <- function() {
 
 
 # Functions for usage tracking of qualidim2 Navbarpage ################################################################
-fields_q2 <- c("qualdim2", "ipid")   # names of fields to track
+fields_q2 <- c("qualdim2", "ipid", "q2_inf_stars", "q2_sic_stars")   # names of fields to track
 outputDir_q2 <- "responses_qualdim2"
 
 saveData_q2 <- function(data_q2) {
@@ -170,7 +170,7 @@ saveData_fb_q1 <- function(data_fb_q1) {
 
 # Function for Feedback recording of likert navbarpage #####################################
 
-fields_fb_likert <- c("likert_fb_inf", "likert_fb_sic", "likert_inf_stars", "likert_sic_stars")   # names of fields to track
+fields_fb_likert <- c("likert_inf_stars", "likert_sic_stars")   # names of fields to track
 outputDir_fb_likert <- "responses_fb_likert"
 
 saveData_fb_likert <- function(data_fb_likert) {
@@ -188,7 +188,7 @@ saveData_fb_likert <- function(data_fb_likert) {
 
 # Function for Feedback recording of jitter v2 navbarpage #####################################
 
-fields_fb_q2 <- c("qualdim2_fb_inf", "qualdim2_fb_sic")   # names of fields to track
+fields_fb_q2 <- c("q2_inf_stars", "q2_sic_stars")   # names of fields to track
 outputDir_fb_q2 <- "responses_fb_q2"
 
 saveData_fb_q2 <- function(data_fb_q2) {
@@ -223,7 +223,7 @@ saveData_fb_logout <- function(data_fb_logout) {
 
 # Function for Feedback recording of freitextpage #####################################
 
-fields_fb_frei <- c("frei_fb_inf", "frei_fb_finf", "frei_fb_fazit")   # names of fields to track
+fields_fb_frei <- c("frei_inf_stars")   # names of fields to track
 outputDir_fb_frei <- "responses_fb_frei"
 
 saveData_fb_frei <- function(data_fb_frei) {
@@ -356,6 +356,7 @@ shinyServer(function(input, output, session) {
    
    observeEvent(input$gofreitext,{
      show("freitext-container")
+     show("frei_form", anim = T, animType = "fade", time = 1)
    })
    
   
@@ -684,7 +685,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$goqualdim, {
     show("qualdimplot1-container")
-    show("q1_star_wellpanel")
+    show("q1_star_wellpanel", anim = T, animType = "fade", time = 1)
   })
   
   # Call of qualidimplotgone() mit Actionbutton  ######################################################################
@@ -743,6 +744,8 @@ shinyServer(function(input, output, session) {
   # When the Submit button is clicked, save the form data
   observeEvent(input$likert_fb_btn, {
     saveData_fb_likert(formData_fb_likert())
+    reset("likert_inf_stars")
+    reset("likert_sic_stars")
   })
   
   
@@ -750,6 +753,10 @@ shinyServer(function(input, output, session) {
   
   # Reset q1 ###########################################
   observeEvent(input$qualdim1_fb_btn, {
+    reset("q1_inf_stars")
+    reset("q1_sic_stars")
+  })
+  observeEvent(input$goqualdim, {
     reset("q1_inf_stars")
     reset("q1_sic_stars")
   })
@@ -774,9 +781,11 @@ shinyServer(function(input, output, session) {
   
   # Reset q2 ###########################################
   observeEvent(input$qualdim2_fb_btn, {
-    reset("qualdim2_fb_inf")
-    reset("qualdim2_fb_sic")
+    reset("q2_form")
   })
+   observeEvent(input$goqualdim2, {
+     reset("q2_form")
+   })
   
   # Write Feedback q2 ##################################
   
@@ -798,8 +807,10 @@ shinyServer(function(input, output, session) {
   
   # Reset q2 ###########################################
   observeEvent(input$frei_fb_btn, {
-    reset("frei_fb_inf")
-    reset("frei_fb_sic")
+    reset("frei_inf_stars")
+  })
+  observeEvent(input$gofreitext, {
+    reset("frei_inf_stars")
   })
   
   # Write Feedback frei ##################################
@@ -855,6 +866,21 @@ shinyServer(function(input, output, session) {
        js$closeWindow()
        stopApp()
   })
+     
+     # Save logut-form through all PlotButton (to track non-logout-people)
+     
+     observeEvent(input$golikert, {
+       saveData_help(formData_help())
+     })
+     observeEvent(input$goqualdim, {
+       saveData_help(formData_help())
+     })
+#     observeEvent(input$goqualdim2, {
+#       saveData_help(formData_help())
+#     })
+     observeEvent(input$gofreitext, {
+       saveData_help(formData_help())
+     })
   
   
 
@@ -1102,6 +1128,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$goqualdim2,{
     show("plot-container")
+    show("q2_form", anim = T, animType = "fade", time = 1)
   })
   
   qualdim2plotgone <- eventReactive(input$goqualdim2,{     
