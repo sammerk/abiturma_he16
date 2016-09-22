@@ -84,6 +84,23 @@ inputIp <- function(inputId, value=''){
 }
 
 #####################################################################################
+# Edit Radio button fucntion                                             ############
+#####################################################################################
+
+edit_rbutton=function(rb){
+  
+  for( i in 1:length(rb$children[[2]]$children[[1]])){
+    value=as.numeric(rb$children[[2]]$children[[1]][[i]]$children[[1]]$children[[1]]$attribs$value)
+    if(!is.na(value)&value>0){
+      rb$children[[2]]$children[[1]][[i]]$children[[1]]$children[[2]]$children[[1]]=HTML(paste(rep('<i class="fa fa-star" aria-hidden="true"></i>',value),sep = "",collapse = ""))
+    }
+  }
+  rb
+  
+}
+
+
+#####################################################################################
 # ShinyUI                                                                ############
 #####################################################################################
 
@@ -149,69 +166,26 @@ shinyUI(
                                  hidden(div(id = "likert-plot-container",
                                             tags$img(src = "spinner.gif",
                                                      id = "loading-spinner"),
-                                 imageOutput("einzelplot"))),
-                                # verbatimTextOutput("glimpse_likertdata3")),
+                                 imageOutput("einzelplot")))
+                                # verbatimTextOutput("glimpse_likertdata3")
+                                ),
                               
                               column(3,
+                                     hidden(
+                                       div(id = "likert_star_wellpanel",
                                      wellPanel(
                                        
-                                       h4("Bitte gib uns hin und wieder Feedback zu einem Plot!"),
+                                       h4("Bitte bewerte einige Plots"),
                                        h5(""),
-                                       div(id = "likertform",
-                                       tags$div(HTML('<div id="likertstars1" class="form-group shiny-input-radiogroup shiny-input-container">
-  <label class="control-label" for="dist">Informativität des aktuell dargestellten Plot: </label>
-                                                     <div class="shiny-options-group">
-                                                     <div class="radio">
-                                                     <label>
-                                                     <input type="radio" name="dist" value="norm" checked="checked"/>
-                                                     <span><i class="fa fa-star" aria-hidden="true"></i>
-</span>
-                                                     </label>
-                                                     </div>
-                                                     <div class="radio">
-                                                     <label>
-                                                     <input type="radio" name="dist" value="unif"/>
-                                                     <span><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></span>
-                                                     </label>
-                                                     </div>
-                                                     <div class="radio">
-                                                     <label>
-                                                     <input type="radio" name="dist" value="lnorm"/>
-                                                     <span><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></span>
-                                                     </label>
-                                                     </div>
-                                                     <div class="radio">
-                                                     <label>
-                                                     <input type="radio" name="dist" value="exp"/>
-                                                     <span><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></span>
-                                                     </label>
-                                                     </div>
-                                                     </div>
-                                                     </div>')),
-                                         selectInput("likert_fb_inf", div(HTML("<p>Den aktuell dargestellten Plot finde ich&nbsp;...</p>")),
-                                                     c("bitte auswählen..." = NA,
-                                                       "1 = gar nicht informativ " = 1,
-                                                       "2" = 2,
-                                                       "3" = 3,
-                                                       "4" = 4,
-                                                       "5" = 5,
-                                                       "6 = sehr informativ" = 6)),
-                                         selectInput("likert_fb_sic", div(HTML("<p>Bei der inhaltlichen Interpretation des aktuell dargestellten Plots bin 
-                                                                               ich&nbsp;...</p>")),
-                                                     c("bitte auswählen..." = NA,
-                                                       "1 = sehr unsicher " = 1,
-                                                       "2" = 2,
-                                                       "3" = 3,
-                                                       "4" = 4,
-                                                       "5" = 5,
-                                                       "6 = sehr sicher" = 6)),
-                                         actionButton("likert_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
-                                       )
+                                       edit_rbutton(radioButtons("likert_inf_stars",
+                                                                 div(HTML("<b>Informationsgehalt</b> des aktuellen Plots")),
+                                                                 choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4))),
+                                       edit_rbutton(radioButtons("likert_sic_stars",
+                                                                 div(HTML("Meine <b>Interpretationssicherheit</b> bzgl. des 
+                                                                                             aktuellen Plots")),
+                                                                 choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4)))
                                      ))
-                               
-                              
-                              
-                              
+                                     ))
                    )),
                    
 ###########################################################################
@@ -289,34 +263,26 @@ shinyUI(
                                 bsModal("help_scale", "Erläuterung der Skalierungen", "help_scale_bt", size = "large",
                                         withMathJax(includeMarkdown("Stuff/Helpstuff/scalehelp7.md")))),
                                column(2, 
+                                      hidden(div(id = "q1_star_wellpanel",
                                 wellPanel(
-                                h4("Bitte gib uns hin und wieder Feedback zu einem Plot!"),
-                                div(
-                                  id = "form",
-                                selectInput("qualdim1_fb_inf", div(HTML("<p>Den aktuell dargestellten Plot finde ich&nbsp;...</p>")),
-                                            c("bitte auswählen..." = NA,
-                                              "1 = gar nicht informativ " = 1,
-                                              "2" = 2,
-                                              "3" = 3,
-                                              "4" = 4,
-                                              "5" = 5,
-                                              "6 = sehr informativ" = 6)),
-                                selectInput("qualdim1_fb_sic", div(HTML("<p>Bei der inhaltlichen Interpretation des aktuell dargestellten Plots bin 
-                                                                               ich&nbsp;...</p>")),
-                                            c("bitte auswählen..." = NA,
-                                              "1 = sehr unsicher " = 1,
-                                              "2" = 2,
-                                              "3" = 3,
-                                              "4" = 4,
-                                              "5" = 5,
-                                              "6 = sehr sicher" = 6)),
+                                h4("Bitte bewerte einige Plots!"),
+                                edit_rbutton(radioButtons("q1_inf_stars",
+                                                          div(HTML("<b>Informationsgehalt</b> des aktuellen Plots")),
+                                                          choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4))),
+                                edit_rbutton(radioButtons("q1_sic_stars",
+                                                          div(HTML("Meine <b>Interpretationssicherheit</b> bzgl. des 
+                                                                                             aktuellen Plots")),
+                                                          choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4))),
                                 actionButton("qualdim1_fb_btn", "Feedback abschicken", icon = icon("send", lib = "font-awesome"))
-                                )
+                                
+                                
+                                      )
+                                ))
                                 )
                                )
                              
                             
-                   )),
+                   ),
 
 
                    
@@ -478,66 +444,53 @@ tabPanel(title = "Deine Rückmeldung & Logout", value = "logout",
            fluidRow(
              column(8, offset = 2,
                      wellPanel(
-                       h3("Dein Feedback zu den Rückmeldeformaten"),
+                       h3("Dein Feedback"),
                        fluidRow(
                          column(6,
-                       selectInput("glob_fb_likert_inf", div(HTML("<p>Die Einzelantworten fand ich&nbsp;...</p>")),
-                                   c("..." = NA,
-                                     "1 = gar nicht informativ " = 1,
-                                     "2" = 2,
-                                     "3" = 3,
-                                     "4" = 4,
-                                     "5" = 5,
-                                     "6 = sehr informativ" = 6), width = "80%"),
-                       selectInput("glob_fb_q1_inf", div(HTML("<p>Die <b>freie</b> Darstellung der 
-                                                              Qualitätsdimensionen (V1) fand ich&nbsp;...</p>")),
-                                   c("..." = NA,
-                                     "1 = gar nicht informativ " = 1,
-                                     "2" = 2,
-                                     "3" = 3,
-                                     "4" = 4,
-                                     "5" = 5,
-                                     "6 = sehr informativ" = 6), width = "80%")),
-                       column(6,
-                              selectInput("glob_fb_frei_inf", div(HTML("<p>Die Freitexte fand ich&nbsp;...</p>")),
-                                          c("..." = NA,
-                                            "1 = gar nicht informativ " = 1,
-                                            "2" = 2,
-                                            "3" = 3,
-                                            "4" = 4,
-                                            "5" = 5,
-                                            "6 = sehr informativ" = 6), width = "80%"),                       
-                             selectInput("glob_fb_q2_inf", div(HTML("<p>Die <b>vorgegebene</b> Darstellung der 
-                                                              Qualitätsdimensionen (V2) fand ich&nbsp;...</p>")),
-                                   c("..." = NA,
-                                     "1 = gar nicht informativ " = 1,
-                                     "2" = 2,
-                                     "3" = 3,
-                                     "4" = 4,
-                                     "5" = 5,
-                                     "6 = sehr informativ" = 6), width = "80%")
-                       )),
-                       
-                       fluidRow(column(12,
-                      h5("Welche Erkenntnisse hast Du für Dich aus den eben gesichteten Rückmeldungen der Kursteilnehmer/innen 
+                       h4("Dein Feedback zu den Rückmeldeformaten"),
+                       edit_rbutton(radioButtons("glob_fb_likert_inf",
+                                                 div(HTML("Die <b>Informativität</b> der Einzelanworten bewerte ich&nbsp;...")),
+                                                 choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4))),
+                       hr(),
+                       edit_rbutton(radioButtons("glob_fb_q1_inf",
+                                                 div(HTML("Die <b>Informativität</b> der <b>freien</b> Darstellung der 
+                                                              Qualitätsdimensionen (V1) bewerte ich&nbsp;...")),
+                                                 choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4))),
+                       hr(),
+                       h5("Welche Erkenntnisse hast Du für Dich aus den eben gesichteten Rückmeldungen der Kursteilnehmer/innen 
                          gewinnen können?"),
-                      tags$br(),
-                      tags$textarea(id="glob_fb_erk", rows=3, cols=60,"..."),
-                      tags$br())),
-
-                     fluidRow(column(12),
-                              column(12,
-                     h3("Dein Feedback zu abiturma"),
-                     h5("Hier hast Du Platz für jede Art von Rückmeldungen. (Beispielsweise hinsichtlich unserer Kommunikation 
+                       tags$textarea(id="glob_fb_erk", rows=3, cols=60,"..."),
+                       hr(),
+                       h4("Dein Feedback zu abiturma"),
+                       h5("Hier hast Du Platz für jede Art von Rückmeldungen. (Beispielsweise hinsichtlich unserer Kommunikation 
                         mit Dir, den Kursunterlagen, der Organisation vor Ort, Deinen Erfahrungen beim Unterrichten etc.)"),
-                     tags$br(),
-                     tags$textarea(id="glob_fb_abiturma", rows=5, cols=60, "..."),
-                     tags$br(),
-                     hr(),
-                     actionButton("logout_btn", "Feedback abschicken & Logout", icon = icon("off", lib = "glyphicon"))
-             ))
+                                tags$textarea(id="glob_fb_abiturma", rows=5, cols=60, "..."),
+                                tags$br(),
+                       tags$br(),
+                       
+                       actionButton("logout_btn", "Feedback abschicken & Logout", icon = icon("off", lib = "glyphicon"))
+                       
+                       ),        
+                       
+                      column(6,
+                             h4(div(HTML("<font color='#FAFAFA'>Platzhalter inHGcol</font>"))),
+                             edit_rbutton(radioButtons("glob_fb_frei_inf",
+                                                       div(HTML("Die <b>Informativität</b> der Freitexte bewerte ich&nbsp;...")),
+                                                       choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4))),
+                             hr(),
+                             edit_rbutton(radioButtons("glob_fb_q2_inf",
+                                                       div(HTML("Die <b>Informativität</b> der <b>vorgegebenen</b> Darstellung der 
+                                                              Qualitätsdimensionen (V2) bewerte ich&nbsp;...")),
+                                                       choices = list("bitte bewerten" = 0,'one'=1,"two"=2, "three" = 3, "four" = 4)))              
+ 
+                       )
+                      
+                       )
+                      
+             )
+            
            ))
-         ))
+         )
 
 
 ))

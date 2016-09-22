@@ -71,7 +71,7 @@ loadData <- function() {
 
 # Functions for usage tracking of likert Navbarpage #####################################
 
-fields_l <- c("likertfragen", "ipid", "groupinl")   # names of fields to track
+fields_l <- c("likertfragen", "ipid", "groupinl", "likert_inf_stars", "likert_sic_stars")   # names of fields to track
 outputDir_l <- "responses_likert"
 
 saveData_l <- function(data_l) {
@@ -152,7 +152,7 @@ loadData_q2 <- function() {
 
 # Function for Feedback recording of jitter navbarpage #####################################
 
-fields_fb_q1 <- c("qualdim1_fb_inf", "qualdim1_fb_sic")   # names of fields to track
+fields_fb_q1 <- c("q1_inf_stars", "q1_sic_stars")   # names of fields to track
 outputDir_fb_q1 <- "responses_fb_q1"
 
 saveData_fb_q1 <- function(data_fb_q1) {
@@ -170,7 +170,7 @@ saveData_fb_q1 <- function(data_fb_q1) {
 
 # Function for Feedback recording of likert navbarpage #####################################
 
-fields_fb_likert <- c("likert_fb_inf", "likert_fb_sic", "likertstars1")   # names of fields to track
+fields_fb_likert <- c("likert_fb_inf", "likert_fb_sic", "likert_inf_stars", "likert_sic_stars")   # names of fields to track
 outputDir_fb_likert <- "responses_fb_likert"
 
 saveData_fb_likert <- function(data_fb_likert) {
@@ -684,6 +684,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$goqualdim, {
     show("qualdimplot1-container")
+    show("q1_star_wellpanel")
   })
   
   # Call of qualidimplotgone() mit Actionbutton  ######################################################################
@@ -723,10 +724,10 @@ shinyServer(function(input, output, session) {
   ## Feedback for likert page ######################################################################################
   
   # Reset likert form ###########################################
-  observeEvent(input$likert_fb_btn, {
-
-    reset("likertform")
-    reset("likertstars1")
+  observeEvent(input$golikert, {
+    show("likert_star_wellpanel", anim = T, animType = "fade", time = 1)
+    reset("likert_inf_stars")
+    reset("likert_sic_stars")
   })
   
   # Write Feedback likert ##################################
@@ -749,8 +750,8 @@ shinyServer(function(input, output, session) {
   
   # Reset q1 ###########################################
   observeEvent(input$qualdim1_fb_btn, {
-    reset("qualdim1_fb_inf")
-    reset("qualdim1_fb_sic")
+    reset("q1_inf_stars")
+    reset("q1_sic_stars")
   })
   
   # Write Feedback q1 ##################################
