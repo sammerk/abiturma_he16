@@ -5,6 +5,7 @@ library(shiny)
 library(shinyBS)
 library(feather)
 library(scrypt)
+library(forcats)
 
 
 
@@ -17,10 +18,13 @@ ipID <- renderPrint(print(input$ipid))
 
 #kursdata <- read.table("data/kursdata_fr16_b_demo.csv", sep = ";", header = TRUE, na.strings = c("NA"))       # Import of Data
 kursdata <- data.table::fread("data/data_dynamic/kursdata_inkrementiert.csv", sep = ";", header = TRUE, na.strings = c("NA")) 
-#likertdata1 <- read.table("data/likertdata_fr16_2.csv", sep = ";", header = T, na.strings = c("NA"))
+
 #freitextdata <- read.table("data/freitextdata_fr16_demo.csv", sep = ";", header = T, na.strings = c("NA"))
 freitextdata <- data.table::fread("data/data_dynamic/freitextdata_inkrementiert.csv", sep = ";", header = TRUE, na.strings = c("NA"), stringsAsFactors = T) 
-likertdata1 <- read.table("data/likertdata_fr16_2_demo.csv", sep = ";", header = T, na.strings = c("NA"))
+
+#likertdata1 <- read.table("data/likertdata_fr16_2_demo.csv", sep = ";", header = T, na.strings = c("NA"))
+likertdata1 <-  data.table::fread("data/data_dynamic/likertdata_inkrementiert.csv", sep = ";", header = T, na.strings = c("NA"))
+
 #pw_data2 <- read_feather("Stuff/kl_pw.feather")
 pw_data <- tbl_df(data.table::fread("data/data_kl/data_pw_scrypted.csv", sep = ";", na.strings = "NA"))
 
@@ -390,22 +394,7 @@ shinyServer(function(input, output, session) {
       
       
     })
-  
-  ## Debug DF
-  output$freitextdata_debug1 <-  renderPrint({
 
-    as.character(freitextdata2()$ftk[5])
-
-    })
-  output$freitextdata_debug2 <-  renderPrint({
-
-    class(freitextdata2()$ftk)
-  })
-  output$freitextdata_debug3 <-  renderPrint({
-    head(freitextdata2())
-
-  })
-  
   ## 
   max_freitextplots <- 70
   
@@ -892,9 +881,9 @@ shinyServer(function(input, output, session) {
     "Du hast im Kurs die Bearbeitung Abi-relevanter Aufgabentypen geübt."   , #or4
     "Du hast durch den Kurs Wissenslücken schließen können.") #or5
   items_grup <- c(
-    "Die Kursteilnehmer/innen werden ermutigt, Fragen zu stellen.", #gi1
+    "Der/die Kursleiter/in ermutigt die Teilnehmenden, an den Diskussionen im Kurs teilzunehmen.", #gi1
     "Die Kursteilnehmer/innen werden eingeladen, eigene Ideen und Lösungswege mitzuteilen.", #gi2
-    "Die Kursteilnehmer/innen wurden ermutigt, Fragen zu stellen.", #gi3
+    "Die Kursteilnehmer/innen werden ermutigt, Fragen zu stellen.", #gi3
     "Die Kursteilnehmer/innen werden ermutigt, eigene Lösungswege zu formulieren und/oder die vorgetragenen Lösungen kritisch zu hinterfragen.") #gi4
   items_indi <- c(
     "Der/die Kursleiter/in ist den Teilnehmenden gegenüber stets freundlich.", #ir1
@@ -961,7 +950,9 @@ shinyServer(function(input, output, session) {
           filter(Kursbeginn != "Herbst '15")%>%
           mutate(gmgroup     =  ifelse(kursleiterin == user(), "Deine Kurse", "abiturma gesamt"),
                  mggroup     =  paste("Dein Kurs in", Kursort, "/n", Kursbeginn, Uhrzeit))%>%
-          filter(variable %in% items_grup)
+          filter(variable %in% items_grup)%>%
+          mutate(variable = fct_recode(variable,
+                                       "Die Kursteilnehmer/innen werden ermutigt, eigene Lösungswege zu formulieren und/oder\ndie vorgetragenen Lösungen kritisch zu hinterfragen." = "Die Kursteilnehmer/innen werden ermutigt, eigene Lösungswege zu formulieren und/oder die vorgetragenen Lösungen kritisch zu hinterfragen."))
         
       }
       
@@ -1005,11 +996,24 @@ shinyServer(function(input, output, session) {
        
       })
   
+
+  ## reactive Data frame with info for plot title
+  
+  likertdata_with_userinfo <- eventReactive(input$golikert, { 
+                               likertdata1%>%
+                                  mutate(Kursbeginn = lubridate::ymd(Kursbeginn))%>%
+                                  filter(kursleiterin == user())%>%
+                                  filter(Kursbeginn == max(Kursbeginn, na.rm = T))
+                                  
+    })
+    
+  
+  
   ## Debug  #################################################################################################
   
-  output$glimpse_likertdata3 <- renderPrint({n_lev_mg()})
-  output$user_p <- renderPrint({login_true()})
-  output$pw_conf <- renderPrint({input$likertfragen})
+ output$glimpse_likertdata3 <- renderPrint({glimpse(likertdata_with_userinfo())})
+ #output$user_p <- renderPrint({login_true()})
+ #output$pw_conf <- renderPrint({input$likertfragen})
   
 
   
@@ -1017,24 +1021,26 @@ shinyServer(function(input, output, session) {
   # Create Einzelplots #################################################################################################
   
   # Colorpalette
-  cbPalette <- c("#A51E37", "#D8516A", "#FF849D", "#F8F8F8", "#95C3DF", "#497793", "#002A46")
+  cbPalette <- c("#A51E37", "#D8516A", "#FF849D", "#D9D9D9", "#95C3DF", "#497793", "#002A46")
   
   # Einzelplot with reactive grouping
   einzelplot_s <- eventReactive(input$golikert, {                   
        likertplot <- ggplot(likertdata3(), aes(x=gmgroup, y = Freq_per, fill = value)) + geom_bar(stat='identity') + 
              coord_flip() + facet_wrap(~variable, ncol =1)   + 
-             ggtitle("Deine Kurse Frühjahr '16") +
+             ggtitle(paste("Deine Kurse in ", likertdata_with_userinfo()$Kursort[1],"\n Kursbeginn: ", likertdata_with_userinfo()$Kursbeginn[1], sep = "")) +
              scale_fill_manual(limits = c("1 = trifft überhaupt nicht zu", "2","3" ,"4","5" ,"6","7 = trifft vollständig zu"),
                                labels = c("1 = trifft überhaupt nicht zu", "2","3" ,"4","5" ,"6","7 = trifft vollständig zu"), values = cbPalette) +
              guides(fill = guide_legend(nrow = 1)) +
              theme(legend.title=element_blank(), legend.position = "top",
                    axis.title.y = element_blank(),
                    axis.title.x = element_blank(),
-                   strip.text.x = element_text(size = 9),
+                   strip.text.x = element_text(size = 9, lineheight=1.1),
                    plot.background = element_blank(),
+                   panel.background = element_rect(fill = '#FAFAFA'),
                    panel.grid.major = element_blank(),
                    panel.grid.minor = element_blank(),
-                   panel.border = element_blank())
+                   panel.border = element_blank(),
+                   plot.title = element_text(lineheight=1.1))
     
        likertplot
     

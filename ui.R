@@ -149,7 +149,8 @@ shinyUI(
                                  hidden(div(id = "likert-plot-container",
                                             tags$img(src = "spinner.gif",
                                                      id = "loading-spinner"),
-                                 imageOutput("einzelplot")))),
+                                 imageOutput("einzelplot"))),
+                                # verbatimTextOutput("glimpse_likertdata3")),
                               
                               column(3,
                                      wellPanel(
@@ -446,11 +447,7 @@ tabPanel(title = "Freitext-Antworten", value = "freitext_antw",
                     Hast du die Option \"absteigende Gesamtbewertung\" ausgewählt, werden die Freitexte nach den 
                     Bewertungen in den Qualitätsdimensionen sortiert: Oben stehen die Freitexte von TeilnehmerInnen die dich 
                     am besten bewertet haben."),
-                  uiOutput("freitextplots"),
-                  verbatimTextOutput("freitextdata_debug1"),
-                  verbatimTextOutput("freitextdata_debug2"),
-                  verbatimTextOutput("freitextdata_debug3")
-                  ),
+                  uiOutput("freitextplots")),
             column(2,
                   wellPanel(
                     h4("Bitte gib uns Feedback zu deiner Wahrnehmung der Freitexte!"),

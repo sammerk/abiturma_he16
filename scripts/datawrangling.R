@@ -13,8 +13,8 @@ kn_kl_key <-read.csv(url('https://samuel.merk%40uni-tuebingen.de:afbogena@www.ab
 rawdata_fr16 <- data.table::fread("data/data_raw/rawdata_fr16_utf8.csv", sep = ";", na.strings = "NA")
 
 ## Import Inkrement
-rawdata_inkrement_raw <- data.table::fread("rawdata_charge5/daten.csv", sep = ";")
-
+rawdata_inkrement_imp <- data.table::fread("rawdata_charge5/daten.csv", sep = ";")
+rawdata_inkrement_raw <- rawdata_inkrement_imp
 ## Match Inkrement + kn_kn_key 
 rawdata_inkrement_raw$Klassen.Id <- rawdata_inkrement$ID
 rawdata_inkrement_raw$em2 <- NULL ## zu ändern im Questor-Codeplan
@@ -44,7 +44,7 @@ rawdata <- dplyr::full_join(rawdata_inkrement, rawdata_fr16)
 
 
 
-## Data wrangling für Passung auf bisherige App ##################################################################################
+## kursdata wrangling  ##########################################################################################
 
 ## Kursdata_ink erstellen
 # Factor scores bilden
@@ -90,7 +90,7 @@ kursdata_ink%>%
 levels(as.factor(kursdata_ink$variable))
 
 
-######## Writing Zone   ##################################################################################################
+######## Writing Zone kursdata ###############################################################################################
 ### Schreiben kursdata_ink
 # write.table(kursdata_ink, file = "data/data_dynamic/kursdata_inkrementiert.csv", sep = ";", row.names = F, quote = F) 
 ##########################################################################################################################
@@ -109,11 +109,65 @@ freitextdata_ink <- tbl_df(full_join(rawdata_inkrement_raw,                     
                            ftk = as.factor(paste("rawdata_charge5/freitextbilder/", ftk, sep = "")))%>%                    
                     select(ftk, kursleiterin, score)
                     
-######## Writing Zone   ##################################################################################################
+######## Writing Zone  freitextdat  ######################################################################################
 #   Schreiben freitextdata_ink
 #   write.table(freitextdata_ink, file = "data/data_dynamic/freitextdata_inkrementiert.csv", sep = ";", row.names = F, quote = F) 
 ##########################################################################################################################
 
+
+
+## likertdata wrangling ##################################################################################################
+library(forcats)
+likertdata_ink <- rawdata_inkrement%>%
+  tbl_df()%>%
+  mutate(kursleiterin = Username,
+         Kursbeginn = Kursdatum)%>%
+  select(num_range("le", 1:4), num_range("en", 1:4), num_range("ci", 1:4), 
+         num_range("ir", 1:3), num_range("or", 1:5),
+         Kursbeginn, Kursort, Uhrzeit, kursleiterin)%>%
+  gather(variable, value, num_range("le", 1:4), num_range("en", 1:4), num_range("ci", 1:4), 
+                          num_range("ir", 1:3), num_range("or", 1:5))%>%
+  mutate(value = as.factor(value),
+         Kursort = as.factor(Kursort),
+         value = fct_recode(value,
+                            "7 = trifft vollständig zu"     = "7",
+                            "1 = trifft überhaupt nicht zu" = "1"),
+         variable = fct_recode(variable, 
+                               "Du hast im Kurs etwas Nützliches gelernt." = "le1",
+                               "Dein Interesse am Mathematik-Abistoff ist durch den Kurs gestiegen." = "le2",
+                               "Du hast die Inhalte des Kurses verstanden."= "le3",
+                               "Du fandest den Kurs herausfordernd und wurdest zum Denken angeregt." = "le4",
+                               
+                               "Der/die Kursleiter/in unterrichtet mit Begeisterung." = "en1",
+                               "Der/die Kursleiter/in ist dynamisch und unterrichtet voller Energie."= "en2",
+                               "Der/die Kursleiter/in lockert den Unterricht durch Humor auf." = "en3",
+                               "Der/die Kursleiter/in hält Dein Interesse während des Kurses durch seinen/ihren Unterrichtsstil aufrecht." = "en4",
+                               
+                               "Die Erklärungen des Kursleiters/ der Kursleiterin sind verständlich."= "or1",
+                               "Der/die Kursleiter/in ist gut vorbereitet und erklärt die Inhalte sorgfältig." = "or2",
+                               "Du hast im Kurs einen Überblick über alle Abi-relevanten Themen erhalten." = "or3",
+                               "Du hast im Kurs die Bearbeitung Abi-relevanter Aufgabentypen geübt." = "or4",
+                               "Du hast durch den Kurs Wissenslücken schließen können."= "or5",
+                               
+
+                               "Der/die Kursleiter/in ermutigt die Teilnehmenden, an den Diskussionen im Kurs teilzunehmen." = "ci1",
+                               "Die Kursteilnehmer/innen werden eingeladen, eigene Ideen und Lösungswege mitzuteilen." = "ci2",
+                               "Die Kursteilnehmer/innen werden ermutigt, Fragen zu stellen."= "ci3",
+                               "Die Kursteilnehmer/innen werden ermutigt, eigene Lösungswege zu formulieren und/oder die vorgetragenen Lösungen kritisch zu hinterfragen." = "ci4",
+
+                               "Der/die Kursleiter/in ist den Teilnehmenden gegenüber stets freundlich." = "ir1",
+                               "Der/die Kursleiter/in gibt den Teilnehmenden das Gefühl, jederzeit um Hilfe bitten zu können." = "ir2",
+                               "Der/die Kursleiter/in interessiert sich aufrichtig für die Teilnehmenden." = "ir3"))
+    
+  
+  
+######## Writing Zone  likertdata  ######################################################################################
+#   Schreiben likertdata_ink
+#   write.table(likertdata_ink, file = "data/data_dynamic/likertdata_inkrementiert.csv", sep = ";", row.names = F, quote = F) 
+##########################################################################################################################
+
+
+         
 
 
 
