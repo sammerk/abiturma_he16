@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 responses_jitter/
+responses_help/
 responses_likert/
 responses_freitext/
 responses_qualdim2/

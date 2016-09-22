@@ -6,25 +6,28 @@
 
 ## Import und Merging FB Data ##################################################################################
 
-## Import des Kursnummer/Kursleiterschlüssels
-kn_kl_key <-read.csv(url('https://samuel.merk%40uni-tuebingen.de:afbogena@www.abiturma.de/dornier/api/daten-fragebogen'), encoding="UTF-8")
+## Import des Kursnummer/Kursleiterschlüssels und Ausschluss in der Zukunft liegender Kurse
+kn_kl_key <- read.csv(url('https://samuel.merk%40uni-tuebingen.de:afbogena@www.abiturma.de/dornier/api/daten-fragebogen'), encoding="UTF-8")%>%
+  mutate(Kursstart = lubridate::dmy(Kursstart))%>%
+  filter(Kursstart < lubridate::today())
 
 ## Import der Rohdaten aus dem Frühjahr 2016
-rawdata_fr16 <- data.table::fread("data/data_raw/rawdata_fr16_utf8.csv", sep = ";", na.strings = "NA")
+rawdata_fr16 <- data.table::fread("data/data_raw/rawdata_fr16_utf8.csv", sep = ";", na.strings = "NA")       #x#x Missing in ID Variablen?
 
 ## Import Inkrement
 rawdata_inkrement_imp <- data.table::fread("rawdata_charge5/daten.csv", sep = ";")
 rawdata_inkrement_raw <- rawdata_inkrement_imp
+
 ## Match Inkrement + kn_kn_key 
-rawdata_inkrement_raw$Klassen.Id <- rawdata_inkrement$ID
+rawdata_inkrement_raw$Klassen.Id <- rawdata_inkrement_raw$ID
 rawdata_inkrement_raw$em2 <- NULL ## zu ändern im Questor-Codeplan
 rawdata_inkrement_raw$em2 <- NULL ## zu ändern im Questor-Codeplan
-rawdata_inkrement <- dplyr::left_join(rawdata_inkrement_raw, kn_kl_key, by = "Klassen.Id")
+rawdata_inkrement <- dplyr::left_join(rawdata_inkrement_raw, kn_kl_key, by = "Klassen.Id")%>%
+  filter(is.na(Kurs.Id)==F)                                                                             ## NA entstehen durch falsche IDs auf Fragebögen
 
 
 ## Vorbereitung Kursdatum
 rawdata_fr16$Kursdatum <- lubridate::dmy(rawdata_fr16$Kursbeginn)
-rawdata_inkrement$Kursdatum <- lubridate::dmy(rawdata_inkrement$Kursstart)
 
 ##Vorbereitung Uhrzeit
 rawdata_fr16$Uhrzeit <- rawdata_fr16$Kurszeit
@@ -98,7 +101,7 @@ levels(as.factor(kursdata_ink$variable))
 
 
 ######## Dynamisch inkrementelles Freitext data generieren ###############################################################
-freitextdata_ink <- tbl_df(full_join(rawdata_inkrement_raw,                     ## Hier wird es nur _inks geben, da 
+freitextdata_ink <- tbl_df(full_join(rawdata_inkrement_raw,                     ## Hier wird es nur inkremente geben, da 
                                      kn_kl_key, by = "Klassen.Id"))%>%          ## Freitexte von vor Herbst '16 nicht angezeigt 
                     mutate(kursleiterin = as.factor(Username),                             ## werden.
                            score = rowMeans(data.frame(le1,le2,le3,le4,
@@ -121,7 +124,7 @@ library(forcats)
 likertdata_ink <- rawdata_inkrement%>%
   tbl_df()%>%
   mutate(kursleiterin = Username,
-         Kursbeginn = Kursdatum)%>%
+         Kursbeginn = Kursstart)%>%
   select(num_range("le", 1:4), num_range("en", 1:4), num_range("ci", 1:4), 
          num_range("ir", 1:3), num_range("or", 1:5),
          Kursbeginn, Kursort, Uhrzeit, kursleiterin)%>%
@@ -177,32 +180,33 @@ likertdata_ink <- rawdata_inkrement%>%
 ######## Inkremetierung der Passwörter
 
 # Import der bereits existierenden KL 
-data_pw_bestehend <- read.table("data/data_kl/data_pw.csv", sep = ";", header = T)
+data_pw_bestehend <- read.table("data/data_kl/data_pw_charge0.csv", sep = ";", header = T)
 data_pw_bestehend$Datum <- as.Date(data_pw_bestehend$Datum)
 
 # Filterung des Inkrements (= "neue" KL) und PW-Genese
 library(random)
 library(lubridate)
 data_pw_inkrement <- rawdata_inkrement%>%
-  select(Personalnummer, Kursdatum)%>%
+  select(Personalnummer, Kursstart)%>%
   unique()%>%
   filter(is.na(Personalnummer) == F, !Personalnummer %in% data_pw_bestehend$Personalnummer)%>%
   mutate(Passwort = as.character(randomStrings(n=n(), len=5, digits=TRUE, upperalpha=TRUE, loweralpha=TRUE, unique=TRUE)),
-         Kursdatum = lubridate::ymd(Kursdatum))%>%
-  filter(Kursdatum < lubridate::today())
+         Kursstart = lubridate::ymd(Kursstart))%>%
+  filter(Kursstart < lubridate::today())
 
 ## Schleife für randomisiertes Versendedatum
+ datum_inkrement <- c(rep(today(),nrow(data_pw_inkrement))) #initialize
+
 for (i in 1:nrow(data_pw_inkrement)) {
-  datum_inkrement <- c(rep(today(),nrow(data_pw_inkrement))) #initialize
-  datum_inkrement[i] <- data_pw_inkrement$Kursdatum[i] + 
+ datum_inkrement[i] <- data_pw_inkrement$Kursstart[i] + 
             lubridate::days(x=4) +
-            lubridate::weeks(x = as.numeric(randomNumbers(n = 1, min = 1, max = 3, col = 1)))
+            lubridate::weeks(x = as.numeric(randomNumbers(n = 1, min = 2, max = 4, col = 1)))
 }
 
 data_pw_inkrement$Datum <- datum_inkrement
 
 data_pw_inkrement <- data_pw_inkrement%>%
-  select(-Kursdatum)
+  select(-Kursstart)
 
 
 # Join Inkrement und Bestehend
@@ -211,8 +215,8 @@ data_pw_inkrementiert <- full_join(data_pw_bestehend, data_pw_inkrement)%>%
   
 
 # Passwörter verschlüsseln und encrypt datei erstellen
-pw_scrypted_inkrementiert <- left_join(unique(select(data_pw_inkrementiert, Personalnummer, Passwort)),
-                                      unique(select(kn_kl_key, Personalnummer, Username)))
+pw_scrypted_inkrementiert <- left_join(select(data_pw_inkrementiert, Personalnummer, Passwort),
+                                      unique(select(kn_kl_key, Personalnummer, Username)), by = "Personalnummer" )
 
 for (i in 1:nrow(pw_scrypted_inkrementiert)){
 pw_scrypted_inkrementiert$Passwort_scrypted[i] <-  scrypt::hashPassword(pw_scrypted_inkrementiert$Passwort[i])
@@ -226,7 +230,7 @@ pw_scrypted_inkrementiert <- pw_scrypted_inkrementiert%>%
 #######                                                                                                                                                  
 ####### write.table(data_pw_inkrementiert, file = paste("data/data_kl/data_pw_inkrementiert", as.character(Sys.time()), ".csv", sep = ""),               
 #######                                    sep = ";", row.names = F, quote = F)                                                                          
-####### write.table(data_pw_inkrementiert, file = ## "data/data_kl/data_pw_inkrementiert.csv", sep = ";", row.names = F, quote = F)                      
+####### write.table(data_pw_inkrementiert, file = ## "data/data_kl/data_pw_inkrementiert_charge5.csv", sep = ";", row.names = F, quote = F)                      
 #######                                                                                                                                                  
 #######                                                   
 #######                                                                                                                                                  
