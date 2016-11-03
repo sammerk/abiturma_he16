@@ -101,10 +101,10 @@ klassen_length <- rawdata_inkrement%>%
   group_by(Klassen.Id)%>%
   mutate(length_Klasse = n())
 
-klassen_length %>%
-  filter(length_Klasse == 4)%>%
-  View()
-
+#klassen_length %>%
+#  filter(length_Klasse == 4)%>%
+#  View()
+#
 
 summary(kursdata_ink)
 
@@ -220,11 +220,13 @@ library(random)
 library(lubridate)
 data_pw_inkrement <- rawdata_inkrement%>%
   select(Personalnummer, Kursstart)%>%
+  mutate(Kursstart = lubridate::ymd(Kursstart))%>%
+  filter(Kursstart < lubridate::as_date("2016-10-30"))%>%                 ### Aktualisieren 
+  select(-Kursstart)%>%
   unique()%>%
   filter(is.na(Personalnummer) == F, !Personalnummer %in% data_pw_bestehend$Personalnummer)%>%
-  mutate(Passwort = as.character(randomStrings(n=n(), len=5, digits=TRUE, upperalpha=TRUE, loweralpha=TRUE, unique=TRUE)),
-         Kursstart = lubridate::ymd(Kursstart))%>%
-  filter(Kursstart < lubridate::as_date("2016-10-30"))                 ### Aktualisieren 
+  mutate(Passwort = as.character(randomStrings(n=n(), len=5, digits=TRUE, upperalpha=TRUE, loweralpha=TRUE, unique=TRUE)))
+
 
 
 
@@ -232,53 +234,78 @@ data_pw_inkrement <- rawdata_inkrement%>%
 ## Filtere neue Kurse seit letzten Mailversand = die, die noch Versendedatum brauchen
 
 letztes_Versendedatum <-  ymd("2016-10-01")                            ### Aktualisieren 
-
-datum_neue_charge <- rawdata_inkrement%>%
-  select(Kursdatum, Personalnummer)%>%
-  filter(Kursdatum > letztes_Versendedatum)%>%
-  unique()
+                                                                      ### Obwohl reales letztes versendedatum == 04.11, hier bei der nächsten runde vor den 01.11 datieren
+personalnummer_neue_charge <- rawdata_inkrement%>%
+  filter(Kursdatum > letztes_Versendedatum)%>%       ## Führt zu Problem Falls Umschalf später als Versendedatum ankommt
+  distinct(Personalnummer)
 
 
 
 ## Schleife für randomisiertes Versendedatum
- datum_inkrement <- c(rep(today(),nrow(datum_neue_charge)))   #initialize
+datum_inkrement <- c(rep(today(),nrow(personalnummer_neue_charge)))   #initialize
 
-for (i in 1:nrow(datum_neue_charge)) {
+for (i in 1:nrow(personalnummer_neue_charge)) {
  datum_inkrement[i] <- datum_inkrement[i] + 
-            lubridate::days(x=1) +
-            lubridate::weeks(x = as.numeric(randomNumbers(n = 1, min = 0, max = 2, col = 1)))
+            lubridate::days(x=1) +                                       ###### da random.org platt war haben `sample()` verwendet
+            lubridate::weeks(x = sample(0:2, 1, replace=T))              ###### as.numeric(randomNumbers(n = 1, min = 0, max = 2, col = 1)))
 }
 
-datum_neue_charge$Datum <- datum_inkrement
+personalnummer_neue_charge$Datum <- datum_inkrement
 
 
-## Hier fehlt noch der Join ....
-
-data_pw_inkrement <- data_pw_inkrement%>%
-  select(-Kursstart)
+## Joining pw inkrement und bestehend
+data_pw_inkrementiert <- full_join(select(data_pw_bestehend, -Datum), data_pw_inkrement)
 
 
+## Joining pw_inkrementiert und personalnummer_neue_charge
+## Dieser Join führt dazu, dass die hochzuladende .csv nicht! inkrementell wächst
+data_pw_datum_inkrementiert <- left_join(personalnummer_neue_charge, data_pw_inkrementiert, by = "Personalnummer")
 
-  
 
 # Passwörter verschlüsseln und encrypt datei erstellen
-pw_scrypted_inkrementiert <- left_join(select(data_pw_inkrementiert, Personalnummer, Passwort),
-                                      unique(select(kn_kl_key, Personalnummer, Username)), by = "Personalnummer" )
+for (i in 1:nrow(data_pw_datum_inkrementiert)){
+  data_pw_datum_inkrementiert$Passwort_scrypted[i] <-  scrypt::hashPassword(data_pw_datum_inkrementiert$Passwort[i])
+}
 
+# Join the email Adress please!
+data_pw_datum_email_inkrement <- left_join(data_pw_datum_inkrementiert, unique(select(kn_kl_key, Personalnummer, Username)))
+
+# Object für Shiny generieren
+pw_scrypted_inkrementiert <- full_join(
+  select(data_pw_datum_email_inkrement, Personalnummer, Passwort), 
+  select(data_pw_bestehend, Personalnummer, Passwort))
+    
 for (i in 1:nrow(pw_scrypted_inkrementiert)){
-pw_scrypted_inkrementiert$Passwort_scrypted[i] <-  scrypt::hashPassword(pw_scrypted_inkrementiert$Passwort[i])
+  pw_scrypted_inkrementiert$Passwort_scrypted[i] <-  scrypt::hashPassword(pw_scrypted_inkrementiert$Passwort[i])
 }
 
 pw_scrypted_inkrementiert <- pw_scrypted_inkrementiert%>%
+  left_join(unique(select(kn_kl_key, Personalnummer, Username)))%>%
   mutate(Login = Username)%>%
-  select(Login, Passwort_scrypted)
+  select(Login, Passwort_scrypted)%>%
+  tbl_df()
 
+
+# Ojekt für abiturma-Mail-Roboter
+data_mail_roboter_inkrementiert <- data_pw_datum_email_inkrement%>%
+  select(Datum, Personalnummer, Passwort)%>%
+  full_join(data_pw_bestehend)
+
+
+### Zu testloginzwecken:
+data_pw_datum_email_inkrement%>%
+  select(Datum, Personalnummer, Passwort, Username)%>%
+  full_join(data_pw_bestehend)
+
+
+  
+  
 #############  Danger Zone  ################################################################################################################################
 #######                                                                                                                                                  
-####### write.table(data_pw_inkrementiert, file = paste("data/data_kl/data_pw_inkrementiert", as.character(Sys.time()), ".csv", sep = ""),               
+####### write.table(data_mail_roboter_inkrementiert, file = paste("data/data_kl/data_pw_inkrementiert", as.character(Sys.time()), ".csv", sep = ""),               
 #######                                    sep = ";", row.names = F, quote = F)     
 #######
-####### write.table(data_pw_inkrementiert, file = ## "data/data_kl/data_pw_inkrementiert_charge5.csv", sep = ";", row.names = F, quote = F)                      
+####### write.table(data_mail_roboter_inkrementiert, file = "data/data_kl/data_pw_inkrementiert_charge14.csv", sep = ";", row.names = F, quote = F)              
 #######                                                                                                                                                  
 #######                                                   
 #######                                                                                                                                                  
