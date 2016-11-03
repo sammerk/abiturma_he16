@@ -2,23 +2,23 @@
 # Datawrangling script abiturma <-> feedbackapp   #
 ###################################################
 
-
+##    ---> mit strg + f nach "### Aktualisieren" suchen ########################################################
 
 ## Import und Merging FB Data ##################################################################################
 
-## Import des Kursnummer/Kursleiterschlüssels und Ausschluss in der Zukunft liegender Kurse
+## Import der Kursnummer/Kursleiterschlüssels und Ausschluss in der Zukunft liegender Kurse
 kn_kl_key <- read.csv(url('https://samuel.merk%40uni-tuebingen.de:afbogena@www.abiturma.de/dornier/api/daten-fragebogen'), encoding="UTF-8")%>%
   mutate(Kursstart = lubridate::dmy(Kursstart))%>%
-  filter(Kursstart < lubridate::today())
+  filter(Kursstart < lubridate::as_date("2016-10-30"))                                                                    ### Aktualisieren 
 
 ## Import der Rohdaten aus dem Frühjahr 2016
 rawdata_fr16 <- data.table::fread("data/data_raw/rawdata_fr16_utf8.csv", sep = ";", na.strings = "NA")       #x#x Missing in ID Variablen?
 
 ## Import Inkrement
-rawdata_inkrement_imp <- data.table::fread("rawdata_charge5/daten.csv", sep = ";")
+rawdata_inkrement_imp <- data.table::fread("rawdata_charge14/daten.csv", sep = ";")                                     ### Aktualisieren
 rawdata_inkrement_raw <- rawdata_inkrement_imp
 
-## Match Inkrement + kn_kn_key 
+## Match Inkrement + kn_kl_key 
 rawdata_inkrement_raw$Klassen.Id <- rawdata_inkrement_raw$ID
 rawdata_inkrement_raw$em2 <- NULL ## zu ändern im Questor-Codeplan
 rawdata_inkrement_raw$em2 <- NULL ## zu ändern im Questor-Codeplan
@@ -46,12 +46,27 @@ rawdata_fr16$Klassen.Id <- rawdata_fr16$ID
 rawdata <- dplyr::full_join(rawdata_inkrement, rawdata_fr16)
 
 
+###################################################
+# Manuelle Überarbeitungsschritte                 #
+###################################################
+
+## Kurs 44 löschen, da Springer bewertet wurde                         ### Aktualisieren ?
+rawdata <- rawdata%>%
+  filter(Klassen.Id != 44)
+
+## Sehr kleine Kurse löschen möglicherweise enbtstanden durch falsches klassen.ID abschreiben der SuS
+rawdata <- rawdata%>%
+  group_by(Klassen.Id)%>%
+  mutate(length_Klasse = n())%>%
+  ungroup()%>%
+  filter(length_Klasse >3)
+
 
 ## kursdata wrangling  ##########################################################################################
 
-## Kursdata_ink erstellen
+## Kursdata_ink erstellen: Der folgende Abschnitt erstellt Skalenwerte, macht grand mean, group mean centering
 # Factor scores bilden
-scale_this <- function(x){
+scale_this <- function(x){                                ## wegen Problemen von `scale()` in `mutate()`
   (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)
 }
 
@@ -80,6 +95,17 @@ kursdata_ink <- rawdata%>%
 
 
 # Interne Validierungen:  
+
+### 
+klassen_length <- rawdata_inkrement%>%
+  group_by(Klassen.Id)%>%
+  mutate(length_Klasse = n())
+
+klassen_length %>%
+  filter(length_Klasse == 4)%>%
+  View()
+
+
 summary(kursdata_ink)
 
 kursdata_ink%>%
@@ -170,7 +196,13 @@ likertdata_ink <- rawdata_inkrement%>%
 ##########################################################################################################################
 
 
+
          
+##################################################################################
+### Jetzt wirds Ernschd
+##################################################################################
+
+### ACHTUNG: Datei für bestehende und für aktuelle Passwörter ändern!
 
 
 
@@ -180,10 +212,10 @@ likertdata_ink <- rawdata_inkrement%>%
 ######## Inkremetierung der Passwörter
 
 # Import der bereits existierenden KL 
-data_pw_bestehend <- read.table("data/data_kl/data_pw_charge0.csv", sep = ";", header = T)
-data_pw_bestehend$Datum <- as.Date(data_pw_bestehend$Datum)
+data_pw_bestehend <- read.table("data/data_kl/data_pw_inkrementiert_charge5.csv", sep = ";", header = T)      ### Aktualisieren siehe DANGERZOOOOONE!
+data_pw_bestehend$Datum <- as.Date(data_pw_bestehend$Datum)                                     #                      °°°°°°°°°°°°°°°°°
 
-# Filterung des Inkrements (= "neue" KL) und PW-Genese
+# Filterung des Inkrements (= "neue" KL) und PW-Genese (für diese)
 library(random)
 library(lubridate)
 data_pw_inkrement <- rawdata_inkrement%>%
@@ -192,26 +224,41 @@ data_pw_inkrement <- rawdata_inkrement%>%
   filter(is.na(Personalnummer) == F, !Personalnummer %in% data_pw_bestehend$Personalnummer)%>%
   mutate(Passwort = as.character(randomStrings(n=n(), len=5, digits=TRUE, upperalpha=TRUE, loweralpha=TRUE, unique=TRUE)),
          Kursstart = lubridate::ymd(Kursstart))%>%
-  filter(Kursstart < lubridate::today())
+  filter(Kursstart < lubridate::as_date("2016-10-30"))                 ### Aktualisieren 
+
+
+
+##### Ab jetzt geht es um den Mailversand                                                    
+## Filtere neue Kurse seit letzten Mailversand = die, die noch Versendedatum brauchen
+
+letztes_Versendedatum <-  ymd("2016-10-01")                            ### Aktualisieren 
+
+datum_neue_charge <- rawdata_inkrement%>%
+  select(Kursdatum, Personalnummer)%>%
+  filter(Kursdatum > letztes_Versendedatum)%>%
+  unique()
+
+
 
 ## Schleife für randomisiertes Versendedatum
- datum_inkrement <- c(rep(today(),nrow(data_pw_inkrement))) #initialize
+ datum_inkrement <- c(rep(today(),nrow(datum_neue_charge)))   #initialize
 
-for (i in 1:nrow(data_pw_inkrement)) {
- datum_inkrement[i] <- data_pw_inkrement$Kursstart[i] + 
-            lubridate::days(x=4) +
-            lubridate::weeks(x = as.numeric(randomNumbers(n = 1, min = 2, max = 4, col = 1)))
+for (i in 1:nrow(datum_neue_charge)) {
+ datum_inkrement[i] <- datum_inkrement[i] + 
+            lubridate::days(x=1) +
+            lubridate::weeks(x = as.numeric(randomNumbers(n = 1, min = 0, max = 2, col = 1)))
 }
 
-data_pw_inkrement$Datum <- datum_inkrement
+datum_neue_charge$Datum <- datum_inkrement
+
+
+## Hier fehlt noch der Join ....
 
 data_pw_inkrement <- data_pw_inkrement%>%
   select(-Kursstart)
 
 
-# Join Inkrement und Bestehend
-data_pw_inkrementiert <- full_join(data_pw_bestehend, data_pw_inkrement)%>%
-  select(Datum, Personalnummer, Passwort)
+
   
 
 # Passwörter verschlüsseln und encrypt datei erstellen
@@ -229,7 +276,8 @@ pw_scrypted_inkrementiert <- pw_scrypted_inkrementiert%>%
 #############  Danger Zone  ################################################################################################################################
 #######                                                                                                                                                  
 ####### write.table(data_pw_inkrementiert, file = paste("data/data_kl/data_pw_inkrementiert", as.character(Sys.time()), ".csv", sep = ""),               
-#######                                    sep = ";", row.names = F, quote = F)                                                                          
+#######                                    sep = ";", row.names = F, quote = F)     
+#######
 ####### write.table(data_pw_inkrementiert, file = ## "data/data_kl/data_pw_inkrementiert_charge5.csv", sep = ";", row.names = F, quote = F)                      
 #######                                                                                                                                                  
 #######                                                   
