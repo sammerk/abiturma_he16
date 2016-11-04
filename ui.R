@@ -4,7 +4,7 @@ library(shinyjs)
 source("helpers.R")
 
 
-#####################################################################################
+######################################################################################
 # js code for:                                                                      #
 #     -enter key = simulation of button press                                       #                         
 #     -action button = close app                                                    #

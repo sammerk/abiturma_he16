@@ -135,7 +135,7 @@ freitextdata_ink <- tbl_df(full_join(rawdata_inkrement_raw,                     
                                                        ci1,ci2,ci3,ci4,
                                                        ir1,ir2,ir3,
                                                        or1,or2,or3,or4,or5), na.rm = T),
-                           ftk = as.factor(paste("rawdata_charge5/freitextbilder/", ftk, sep = "")))%>%                    
+                           ftk = as.factor(paste("rawdata_charge14/freitextbilder/", ftk, sep = "")))%>%           ### Aktualisieren        
                     select(ftk, kursleiterin, score)
                     
 ######## Writing Zone  freitextdat  ######################################################################################
