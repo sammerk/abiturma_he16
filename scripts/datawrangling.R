@@ -9,50 +9,43 @@
 ## Import der Kursnummer/Kursleiterschlüssels und Ausschluss in der Zukunft liegender Kurse
 kn_kl_key <- read.csv(url('https://samuel.merk%40uni-tuebingen.de:afbogena@www.abiturma.de/dornier/api/daten-fragebogen'), encoding="UTF-8")%>%
   mutate(Kursstart = lubridate::dmy(Kursstart))%>%
-  filter(Kursstart < lubridate::as_date("2016-10-30"))                                                                    ### Aktualisieren 
+  filter(Kursstart < lubridate::as_date("2017-01-23"))                                      ### Aktualisieren: immer ein paar Tage vor den heutigen Tag
 
-## Import der Rohdaten aus dem Frühjahr 2016
-rawdata_fr16 <- data.table::fread("data/data_raw/rawdata_fr16_utf8.csv", sep = ";", na.strings = "NA")       #x#x Missing in ID Variablen?
+## Import der älteren Rohdaten
 
-## Import Inkrement
-rawdata_inkrement_imp <- data.table::fread("rawdata_charge14/daten.csv", sep = ";")                                     ### Aktualisieren
-rawdata_inkrement_raw <- rawdata_inkrement_imp
+#Import Inkrement
+rawdata_inkrement_imp1 <- data.table::fread("rawdata_herbst16_2charge5/daten.csv", sep = ";")               # wurde im Frühjahr 2017 neu
+rawdata_inkrement_imp1$em2 <- NULL ## zu ändern im Questor-Codeplan                                         # aufgesetzt, deshalb alte
+rawdata_inkrement_imp1$em2 <- NULL ## zu ändern im Questor-Codeplan                                         # Daten herausgeschmissen (außer 102, 103)
+rawdata_inkrement_imp1 <- rawdata_inkrement_imp1 %>%
+  filter(ID == 102 | ID == 103)
+
+#Import aktuelle Daten
+rawdata_inkrement_imp2 <- data.table::fread("rawdata_fruehjahr17_charge2f/daten.csv", sep = ";")                         ### Aktualisieren
+rawdata_inkrement_imp2$em2 <- NULL ## zu ändern im Questor-Codeplan
+rawdata_inkrement_imp2$em2 <- NULL ## zu ändern im Questor-Codeplan
+
+rawdata_inkrement_raw <- rbind(rawdata_inkrement_imp1, rawdata_inkrement_imp2)
 
 ## Match Inkrement + kn_kl_key 
 rawdata_inkrement_raw$Klassen.Id <- rawdata_inkrement_raw$ID
-rawdata_inkrement_raw$em2 <- NULL ## zu ändern im Questor-Codeplan
-rawdata_inkrement_raw$em2 <- NULL ## zu ändern im Questor-Codeplan
 rawdata_inkrement <- dplyr::left_join(rawdata_inkrement_raw, kn_kl_key, by = "Klassen.Id")%>%
   filter(is.na(Kurs.Id)==F)                                                                             ## NA entstehen durch falsche IDs auf Fragebögen
 
 
 ## Vorbereitung Kursdatum
-rawdata_fr16$Kursdatum <- lubridate::dmy(rawdata_fr16$Kursbeginn)
 rawdata_inkrement$Kursdatum <- rawdata_inkrement$Kursstart
-##Vorbereitung Uhrzeit
-rawdata_fr16$Uhrzeit <- rawdata_fr16$Kurszeit
-
-##Vorbereitung Username
-rawdata_fr16$Username <- "abiturma_vor_he16"
 
 ## Vorbereitung Kursort
 rawdata_inkrement$Kursort <- gsub(" \\(.*", "", rawdata_inkrement$Kursbezeichnung)
-rawdata_fr16$Kursort <- rawdata_fr16$Veranstaltungsort
 
-## Vorbereitung Klassen.Id
-rawdata_fr16$Klassen.Id <- rawdata_fr16$ID
-
-## match fr_16 und Inkrement Herbst'16
-rawdata <- dplyr::full_join(rawdata_inkrement, rawdata_fr16)
+## war früher ein match, jetzt Umbenennung, da nachstehender Code `rawdata` verwendet
+rawdata <- rawdata_inkrement
 
 
 ###################################################
 # Manuelle Überarbeitungsschritte                 #
 ###################################################
-
-## Kurs 44 löschen, da Springer bewertet wurde                         ### Aktualisieren ?
-rawdata <- rawdata%>%
-  filter(Klassen.Id != 44)
 
 ## Sehr kleine Kurse löschen möglicherweise enbtstanden durch falsches klassen.ID abschreiben der SuS
 rawdata <- rawdata%>%
@@ -135,8 +128,9 @@ freitextdata_ink <- tbl_df(full_join(rawdata_inkrement_raw,                     
                                                        ci1,ci2,ci3,ci4,
                                                        ir1,ir2,ir3,
                                                        or1,or2,or3,or4,or5), na.rm = T),
-                           ftk = as.factor(paste("rawdata_charge14/freitextbilder/", ftk, sep = "")))%>%           ### Aktualisieren        
-                    select(ftk, kursleiterin, score)
+                           ftk = as.factor(paste("rawdata_fruehjahr17_charge2f/freitextbilder/", ftk, sep = "")))%>%        ### Aktualisieren        
+                    select(ftk, kursleiterin, score)                                                                        ### zuvor die alten Bilder in
+                                                                                                                            ### den neuen Ordner kopieren
                     
 ######## Writing Zone  freitextdat  ######################################################################################
 #   Schreiben freitextdata_ink
@@ -211,34 +205,44 @@ likertdata_ink <- rawdata_inkrement%>%
 
 ######## Inkremetierung der Passwörter
 
-# Import der bereits existierenden KL 
-data_pw_bestehend <- read.table("data/data_kl/data_pw_inkrementiert_charge5.csv", sep = ";", header = T)      ### Aktualisieren siehe DANGERZOOOOONE!
-data_pw_bestehend$Datum <- as.Date(data_pw_bestehend$Datum)                                     #                      °°°°°°°°°°°°°°°°°
+# Import der bereits existierenden KL [AUSKOMMENTIERT, da für Frühjahr 2017 alle neu angelegt werden]
+# data_pw_bestehend <- read.table("data/data_kl/data_pw_inkrementiert_charge14.csv", sep = ";", header = T)      ### Aktualisieren aus DANGERZOOOOONE!
+# data_pw_bestehend$Datum <- as.Date(data_pw_bestehend$Datum)                                                    #                     ***************
 
 # Filterung des Inkrements (= "neue" KL) und PW-Genese (für diese)
 library(random)
 library(lubridate)
-data_pw_inkrement <- rawdata_inkrement%>%
-  select(Personalnummer, Kursstart)%>%
-  mutate(Kursstart = lubridate::ymd(Kursstart))%>%
-  filter(Kursstart < lubridate::as_date("2016-10-30"))%>%                 ### Aktualisieren 
-  select(-Kursstart)%>%
-  unique()%>%
-  filter(is.na(Personalnummer) == F, !Personalnummer %in% data_pw_bestehend$Personalnummer)%>%
-  mutate(Passwort = as.character(randomStrings(n=n(), len=5, digits=TRUE, upperalpha=TRUE, loweralpha=TRUE, unique=TRUE)))
+## [AUSKOMMENTIERT, da für Frühjahr 2017 alle neu angelegt werden]
+# data_pw_inkrement <- rawdata_inkrement%>%
+#   select(Personalnummer, Kursstart)%>%
+#   mutate(Kursstart = lubridate::ymd(Kursstart))%>%
+#   filter(Kursstart < lubridate::as_date("2016-11-18"))%>%                 ### Aktualisieren 
+#   select(-Kursstart)%>%
+#   unique()%>%
+#   filter(is.na(Personalnummer) == F, !Personalnummer %in% data_pw_bestehend$Personalnummer)%>%
+#   mutate(Passwort = as.character(randomStrings(n=n(), len=5, digits=TRUE, upperalpha=TRUE, loweralpha=TRUE, unique=TRUE)))
 
-
+data_pw_inkrement <- rawdata_inkrement%>%                              ### Früher `rawdata_inkrement%>%` bei `rawdata` sind aber Kurse <3 herausgefiltert
+    select(Personalnummer, Kursstart)%>%
+    mutate(Kursstart = lubridate::ymd(Kursstart))%>%
+    # filter(Kursstart < lubridate::as_date("2016-11-18"))%>%                 ### Aktualisieren [Frühjahr 2017 nicht relevant, da alle neu]
+    select(-Kursstart)%>%
+    unique()%>%
+    # filter(is.na(Personalnummer) == F, !Personalnummer %in% data_pw_bestehend$Personalnummer)%>%            #### [Frühjahr 2017 nicht, da alle neu]
+    mutate(Passwort = as.character(randomStrings(n=n(), len=5, digits=TRUE, upperalpha=TRUE, loweralpha=TRUE, unique=TRUE)))
 
 
 ##### Ab jetzt geht es um den Mailversand                                                    
 ## Filtere neue Kurse seit letzten Mailversand = die, die noch Versendedatum brauchen
 
-letztes_Versendedatum <-  ymd("2016-10-01")                            ### Aktualisieren 
-                                                                      ### Obwohl reales letztes versendedatum == 04.11, hier bei der nächsten runde vor den 01.11 datieren
-personalnummer_neue_charge <- rawdata_inkrement%>%
-  filter(Kursdatum > letztes_Versendedatum)%>%       ## Führt zu Problem Falls Umschalf später als Versendedatum ankommt
-  distinct(Personalnummer)
+# letztes_Versendedatum <-  ymd("2016-10-23")                            ### Aktualisieren [Frühjahr 2017 nicht relevant, da alle neu]
+#                                                                        ### Obwohl reales letztes versendedatum == 04.11, hier bei der nächsten runde vor den 01.11 datieren
 
+# personalnummer_neue_charge <- rawdata_inkrement%>%
+#   filter(Kursdatum > letztes_Versendedatum)%>%       ## Führt zu Problem Falls Umschalg später als Versendedatum ankommt
+#   distinct(Personalnummer)                           ## [Filter im Frühjahr 2017 nicht relevant, da alle neu]
+personalnummer_neue_charge <- rawdata_inkrement%>%
+  distinct(Personalnummer)
 
 
 ## Schleife für randomisiertes Versendedatum
@@ -253,9 +257,9 @@ for (i in 1:nrow(personalnummer_neue_charge)) {
 personalnummer_neue_charge$Datum <- datum_inkrement
 
 
-## Joining pw inkrement und bestehend
-data_pw_inkrementiert <- full_join(select(data_pw_bestehend, -Datum), data_pw_inkrement)
-
+## Joining pw inkrement und bestehend [Frühjahr 2017 nicht relevant, da alle neu]
+# data_pw_inkrementiert <- full_join(select(data_pw_bestehend, -Datum), data_pw_inkrement)
+data_pw_inkrementiert <- data_pw_inkrement
 
 ## Joining pw_inkrementiert und personalnummer_neue_charge
 ## Dieser Join führt dazu, dass die hochzuladende .csv nicht! inkrementell wächst
@@ -270,10 +274,12 @@ for (i in 1:nrow(data_pw_datum_inkrementiert)){
 # Join the email Adress please!
 data_pw_datum_email_inkrement <- left_join(data_pw_datum_inkrementiert, unique(select(kn_kl_key, Personalnummer, Username)))
 
-# Object für Shiny generieren
-pw_scrypted_inkrementiert <- full_join(
-  select(data_pw_datum_email_inkrement, Personalnummer, Passwort), 
-  select(data_pw_bestehend, Personalnummer, Passwort))
+# Object für Shiny generieren   [`join` für Frühjahr 2017 nicht relevant, da alle neu]
+# pw_scrypted_inkrementiert <- full_join(
+#   select(data_pw_datum_email_inkrement, Personalnummer, Passwort), 
+#   select(data_pw_bestehend, Personalnummer, Passwort))
+pw_scrypted_inkrementiert <- select(data_pw_datum_email_inkrement, Personalnummer, Passwort)
+
     
 for (i in 1:nrow(pw_scrypted_inkrementiert)){
   pw_scrypted_inkrementiert$Passwort_scrypted[i] <-  scrypt::hashPassword(pw_scrypted_inkrementiert$Passwort[i])
@@ -288,16 +294,19 @@ pw_scrypted_inkrementiert <- pw_scrypted_inkrementiert%>%
 
 # Ojekt für abiturma-Mail-Roboter
 data_mail_roboter_inkrementiert <- data_pw_datum_email_inkrement%>%
-  select(Datum, Personalnummer, Passwort)%>%
-  full_join(data_pw_bestehend)
+  select(Datum, Personalnummer, Passwort) #%>%      
+  # full_join(data_pw_bestehend)                                      # [`join` für Frühjahr 2017 nicht relevant, da alle neu]
 
 
 ### Zu testloginzwecken:
-data_pw_datum_email_inkrement%>%
-  select(Datum, Personalnummer, Passwort, Username)%>%
-  full_join(data_pw_bestehend)
+  # data_pw_datum_email_inkrement%>%
+  #   select(Datum, Personalnummer, Passwort, Username)%>%
+  #   full_join(data_pw_bestehend)
 
-
+tmp <- read.csv(file="data/data_kl/data_pw_inkrementiert_16_2charge5.csv", sep=";") # Aktualisieren (möglicherweise PW der letzten Charge abrufen)
+tmp <- full_join(tmp, kn_kl_key)
+head(tmp)
+rm(tmp)
   
   
 #############  Danger Zone  ################################################################################################################################
@@ -305,7 +314,7 @@ data_pw_datum_email_inkrement%>%
 ####### write.table(data_mail_roboter_inkrementiert, file = paste("data/data_kl/data_pw_inkrementiert", as.character(Sys.time()), ".csv", sep = ""),               
 #######                                    sep = ";", row.names = F, quote = F)     
 #######
-####### write.table(data_mail_roboter_inkrementiert, file = "data/data_kl/data_pw_inkrementiert_charge14.csv", sep = ";", row.names = F, quote = F)              
+####### write.table(data_mail_roboter_inkrementiert, file = "data/data_kl/data_pw_inkrementiert_17_charge2f.csv", sep = ";", row.names = F, quote = F)              
 #######                                                                                                                                                  
 #######                                                   
 #######                                                                                                                                                  

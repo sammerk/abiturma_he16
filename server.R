@@ -377,7 +377,7 @@ shinyServer(function(input, output, session) {
           freitextdata%>%
           filter(kursleiterin == user(),
                  ftk != "data/freitextbilder_questor4/",
-                 ftk != "rawdata_charge14/freitextbilder/")%>%                         ### Aktualisieren 
+                 ftk != "rawdata_fruehjahr17_charge2f/freitextbilder/")%>%                         ### Aktualisieren 
           arrange(desc(score))
       }
       
@@ -387,7 +387,7 @@ shinyServer(function(input, output, session) {
           freitextdata%>%
           filter(kursleiterin == user(),
                  ftk != "data/freitextbilder_questor4/",
-                 ftk != "rawdata_charge14/freitextbilder/")                            ### Aktualisieren 
+                 ftk != "rawdata_fruehjahr17_charge2f/freitextbilder/")                            ### Aktualisieren 
       }
       
       
