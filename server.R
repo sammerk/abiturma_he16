@@ -376,8 +376,9 @@ shinyServer(function(input, output, session) {
         freitextdata1 <-
           freitextdata%>%
           filter(kursleiterin == user(),
-                 ftk != "data/freitextbilder_questor4/",
-                 ftk != "rawdata_fruehjahr17_charge2f/freitextbilder/")%>%                         ### Aktualisieren 
+                 ftk != "rawdata_fruehjahr17_charge10/freitextbilder/winter",
+                 ftk != "rawdata_fruehjahr17_charge10/freitextbilder/",
+                 ftk != "rawdata_fruehjahr17_charge10/freitextbilder/NA")%>%                         ### Aktualisieren 
           arrange(desc(score))
       }
       
@@ -386,8 +387,9 @@ shinyServer(function(input, output, session) {
         freitextdata1 <-
           freitextdata%>%
           filter(kursleiterin == user(),
-                 ftk != "data/freitextbilder_questor4/",
-                 ftk != "rawdata_fruehjahr17_charge2f/freitextbilder/")                            ### Aktualisieren 
+                 ftk != "rawdata_fruehjahr17_charge10/freitextbilder/winter",
+                 ftk != "rawdata_fruehjahr17_charge10/freitextbilder/",
+                 ftk != "rawdata_fruehjahr17_charge10/freitextbilder/NA")                            ### Aktualisieren 
       }
       
       

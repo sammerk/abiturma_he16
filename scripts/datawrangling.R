@@ -9,23 +9,40 @@
 ## Import der Kursnummer/Kursleiterschlüssels und Ausschluss in der Zukunft liegender Kurse
 kn_kl_key <- read.csv(url('https://samuel.merk%40uni-tuebingen.de:afbogena@www.abiturma.de/dornier/api/daten-fragebogen'), encoding="UTF-8")%>%
   mutate(Kursstart = lubridate::dmy(Kursstart))%>%
-  filter(Kursstart < lubridate::as_date("2017-01-23"))                                      ### Aktualisieren: immer ein paar Tage vor den heutigen Tag
+  filter(Kursstart < lubridate::as_date("2017-03-06"))                                      ### Aktualisieren: immer ein paar Tage vor den heutigen Tag
 
 ## Import der älteren Rohdaten
 
-#Import Inkrement
-rawdata_inkrement_imp1 <- data.table::fread("rawdata_herbst16_2charge5/daten.csv", sep = ";")               # wurde im Frühjahr 2017 neu
-rawdata_inkrement_imp1$em2 <- NULL ## zu ändern im Questor-Codeplan                                         # aufgesetzt, deshalb alte
-rawdata_inkrement_imp1$em2 <- NULL ## zu ändern im Questor-Codeplan                                         # Daten herausgeschmissen (außer 102, 103)
-rawdata_inkrement_imp1 <- rawdata_inkrement_imp1 %>%
-  filter(ID == 102 | ID == 103)
+#Import ältere Bögen                                                                                                 ### Aktualisieren
+rawdata_inkrement_imp1 <- data.table::fread("rawdata_winter17Herbstversion_charge2extra/daten.csv", sep = ";")       # in Winterkursen wurde aus Versehen der 
+rawdata_inkrement_imp1$em2 <- NULL ## zu ändern im Questor-Codeplan                                                  # Herbstfragebogen ausgeteilt
+rawdata_inkrement_imp1$em2 <- NULL ## zu ändern im Questor-Codeplan   
+
+rawdata_inkrement_imp1$em3 <- NULL  # aufgrund Ungleichheit zw. den Datensätzen
+rawdata_inkrement_imp1$fr_61 <- NULL  # aufgrund Ungleichheit zw. den Datensätzen
+
+#Import ältere Bögen
+rawdata_inkrement_imp2 <- data.table::fread("rawdata_winter17_charge1b/daten.csv", sep = ";")                            ### Aktualisieren
+rawdata_inkrement_imp2$em2 <- NULL ## zu ändern im Questor-Codeplan                                                  
+rawdata_inkrement_imp2$em2 <- NULL ## zu ändern im Questor-Codeplan  
+
+rawdata_inkrement_imp2$sex <- NULL # aufgrund Ungleichheit zw. den Datensätzen
+rawdata_inkrement_imp2$hkb <- NULL # aufgrund Ungleichheit zw. den Datensätzen
+rawdata_inkrement_imp2 <- rawdata_inkrement_imp2%>%
+  mutate(ftk = paste("winter", ftk, sep=""),
+         fta = paste("winter", fta, sep=""))
+
 
 #Import aktuelle Daten
-rawdata_inkrement_imp2 <- data.table::fread("rawdata_fruehjahr17_charge2f/daten.csv", sep = ";")                         ### Aktualisieren
-rawdata_inkrement_imp2$em2 <- NULL ## zu ändern im Questor-Codeplan
-rawdata_inkrement_imp2$em2 <- NULL ## zu ändern im Questor-Codeplan
+rawdata_inkrement_imp3 <- data.table::fread("rawdata_fruehjahr17_charge10/daten.csv", sep = ";")                         ### Aktualisieren
+rawdata_inkrement_imp3$em2 <- NULL ## zu ändern im Questor-Codeplan
+rawdata_inkrement_imp3$em2 <- NULL ## zu ändern im Questor-Codeplan
 
-rawdata_inkrement_raw <- rbind(rawdata_inkrement_imp1, rawdata_inkrement_imp2)
+rawdata_inkrement_imp3$sex <- NULL # aufgrund Ungleichheit zw. den Datensätzen
+rawdata_inkrement_imp3$hkb <- NULL # aufgrund Ungleichheit zw. den Datensätzen
+
+
+rawdata_inkrement_raw <- rbind(rawdata_inkrement_imp1, rawdata_inkrement_imp2, rawdata_inkrement_imp3)
 
 ## Match Inkrement + kn_kl_key 
 rawdata_inkrement_raw$Klassen.Id <- rawdata_inkrement_raw$ID
@@ -128,7 +145,7 @@ freitextdata_ink <- tbl_df(full_join(rawdata_inkrement_raw,                     
                                                        ci1,ci2,ci3,ci4,
                                                        ir1,ir2,ir3,
                                                        or1,or2,or3,or4,or5), na.rm = T),
-                           ftk = as.factor(paste("rawdata_fruehjahr17_charge2f/freitextbilder/", ftk, sep = "")))%>%        ### Aktualisieren        
+                           ftk = as.factor(paste("rawdata_fruehjahr17_charge10/freitextbilder/", ftk, sep = "")))%>%        ### Aktualisieren        
                     select(ftk, kursleiterin, score)                                                                        ### zuvor die alten Bilder in
                                                                                                                             ### den neuen Ordner kopieren
                     
@@ -303,8 +320,8 @@ data_mail_roboter_inkrementiert <- data_pw_datum_email_inkrement%>%
   #   select(Datum, Personalnummer, Passwort, Username)%>%
   #   full_join(data_pw_bestehend)
 
-tmp <- read.csv(file="data/data_kl/data_pw_inkrementiert_16_2charge5.csv", sep=";") # Aktualisieren (möglicherweise PW der letzten Charge abrufen)
-tmp <- full_join(tmp, kn_kl_key)
+tmp <- read.csv(file="data/data_kl/data_pw_inkrementiert_17_charge10.csv", sep=";") # Aktualisieren (möglicherweise PW der letzten Charge abrufen)
+tmp <- left_join(tmp, kn_kl_key)
 head(tmp)
 rm(tmp)
   
@@ -314,7 +331,7 @@ rm(tmp)
 ####### write.table(data_mail_roboter_inkrementiert, file = paste("data/data_kl/data_pw_inkrementiert", as.character(Sys.time()), ".csv", sep = ""),               
 #######                                    sep = ";", row.names = F, quote = F)     
 #######
-####### write.table(data_mail_roboter_inkrementiert, file = "data/data_kl/data_pw_inkrementiert_17_charge2f.csv", sep = ";", row.names = F, quote = F)              
+####### write.table(data_mail_roboter_inkrementiert, file = "data/data_kl/data_pw_inkrementiert_17_charge10.csv", sep = ";", row.names = F, quote = F)              
 #######                                                                                                                                                  
 #######                                                   
 #######                                                                                                                                                  
