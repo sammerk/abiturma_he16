@@ -376,9 +376,12 @@ shinyServer(function(input, output, session) {
         freitextdata1 <-
           freitextdata%>%
           filter(kursleiterin == user(),
-                 ftk != "rawdata_fruehjahr17_charge10/freitextbilder/winter",
-                 ftk != "rawdata_fruehjahr17_charge10/freitextbilder/",
-                 ftk != "rawdata_fruehjahr17_charge10/freitextbilder/NA")%>%                         ### Aktualisieren 
+                 ftk != "rawdata_fruehjahr17_3_charge1e/freitextbilder/2_",
+                 ftk != "rawdata_fruehjahr17_3_charge1e/freitextbilder/winter",
+                 ftk != "rawdata_fruehjahr17_3_charge1e/freitextbilder/",
+                 ftk != "rawdata_fruehjahr17_3_charge1e/freitextbilder/2_NA",
+                 ftk != "rawdata_fruehjahr17_3_charge1e/freitextbilder/winterNA",
+                 ftk != "rawdata_fruehjahr17_3_charge1e/freitextbilder/NA")%>%                         ### Aktualisieren 
           arrange(desc(score))
       }
       
@@ -387,9 +390,12 @@ shinyServer(function(input, output, session) {
         freitextdata1 <-
           freitextdata%>%
           filter(kursleiterin == user(),
-                 ftk != "rawdata_fruehjahr17_charge10/freitextbilder/winter",
-                 ftk != "rawdata_fruehjahr17_charge10/freitextbilder/",
-                 ftk != "rawdata_fruehjahr17_charge10/freitextbilder/NA")                            ### Aktualisieren 
+                 ftk != "rawdata_fruehjahr17_3_charge1e/freitextbilder/2_",
+                 ftk != "rawdata_fruehjahr17_3_charge1e/freitextbilder/winter",
+                 ftk != "rawdata_fruehjahr17_3_charge1e/freitextbilder/",
+                 ftk != "rawdata_fruehjahr17_3_charge1e/freitextbilder/2_NA",
+                 ftk != "rawdata_fruehjahr17_3_charge1e/freitextbilder/winterNA",
+                 ftk != "rawdata_fruehjahr17_3_charge1e/freitextbilder/NA")                            ### Aktualisieren 
       }
       
       
